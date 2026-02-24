@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 class Category(BaseModel):
+    id: int
     title:str = Field(...,max_length=256, description='Заголовок')
     description: str = Field(..., description='Описание')
     slug: str = Field(..., description='Идентификатор страницы для URL')
