@@ -14,7 +14,7 @@ async def get_categories() -> list:
 
 #получение категории по конкретному id
 @categories_router.get("/{category_id}", status_code=status.HTTP_200_OK, response_model=Category)
-async def get_category(category_id: int) -> dict:   
+async def get_category(category_id: int) -> Category:   
     for category in categories:
         if category.id == category_id:
             return category
@@ -26,7 +26,7 @@ async def get_category(category_id: int) -> dict:
 
 #добавление категории
 @categories_router.post("/add", status_code=status.HTTP_201_CREATED, response_model=Category)
-async def create_category(title: str, description : str, slug : str, is_published : bool) -> dict:
+async def create_category(title: str, description : str, slug : str, is_published : bool) -> Category:
     global next_id
     new_category = Category(
         id=next_id,
