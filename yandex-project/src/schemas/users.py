@@ -7,5 +7,5 @@ class User(BaseModel):
     email: EmailStr
     password: SecretStr
     first_name: str = Field(None,max_length=50)
-    second_name: str = Field(None,max_length=50)
+    second_name: str = Field(max_length=50)
     
