@@ -13,8 +13,9 @@ async def get_locations()-> list:
 @locations_router.get("/{location_id}",status_code=status.HTTP_200_OK, response_model=Location)
 async def get_location(location_id : int)->Location:
     for location in locations:
-        if location == location_id:
+        if location.id == location_id:
             return location
+    
     raise HTTPException(
         detail="Локация не найдена",
         status_code=status.HTTP_404_NOT_FOUND
