@@ -57,3 +57,24 @@ async def delete_category(category_id:int):
         detail="Категория не найдена"
     )
 
+@categories_router.put("/update/{category_id}", status_code=status.HTTP_200_OK, response_model=Category)    
+async def update_category(category_id : int, new_title: str, new_description : str, new_slug : str, new_is_published : bool):
+    for category in categories:
+        if category.id == category_id:
+            category.title = new_title
+            category.description = new_description
+            category.slug = new_slug
+            category.is_published = new_is_published
+            return category
+    
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Категория не найдена"
+    )
+
+    
+    
+    
+    
+    
