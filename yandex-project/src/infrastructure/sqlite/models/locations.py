@@ -27,5 +27,5 @@ class Location(Base):
         default=datetime.now
     )
 
-    #posts = relationship("Post", back_populates="location")
+    posts = relationship("Post", back_populates="location")
 

@@ -1,6 +1,6 @@
 from infrastructure.sqlite.database import Base
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy import String
 
@@ -36,3 +36,6 @@ class User(Base):
         String(50),
         nullable=True
     )
+
+    posts = relationship("Post", back_populates="author")
+    comments = relationship("Comment", back_populates="author")

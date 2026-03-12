@@ -36,4 +36,4 @@ class Category(Base):
         default=datetime.now
     )
     
-    #posts = relationship("Post", back_populates="category")
+    posts = relationship("Post", back_populates="category")

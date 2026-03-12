@@ -54,7 +54,8 @@ class Post(Base):
     author = relationship("User", back_populates="posts")
     location = relationship("Location", back_populates="posts")
     category = relationship("Category", back_populates="posts")
-    comments = relationship("Comment", back_populates="posts")
+    comments = relationship("Comment", back_populates="post")
+
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -83,5 +84,3 @@ class Comment(Base):
     
     post = relationship("Post", back_populates="comments")
     author = relationship("User", back_populates="comments")
-
-
