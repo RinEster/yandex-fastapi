@@ -1,3 +1,4 @@
+from pydantic import SecretStr
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.users import UserRepository
 from schemas.users import User as UserSchema
@@ -15,4 +16,13 @@ class UpdateUserPasswordUseCase:
             
             updated = self._repo.update_password(session, user_id, new_password)
             
-            return UserSchema.model_validate(obj=updated)
+            user_dict = {
+                "id": updated.id,
+                "login": updated.login,
+                "email": updated.email,
+                "password": SecretStr(updated.password),
+                "first_name": updated.first_name,
+                "second_name": updated.second_name
+            }
+
+            return UserSchema.model_validate(obj=user_dict)
