@@ -1,6 +1,6 @@
-from infrastructure.sqlite.database import Base
+from src.infrastructure.sqlite.database import Base
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy import String, Text, Boolean, DateTime
 
@@ -18,19 +18,21 @@ class Category(Base):
         String(256),
         nullable=False
     )
-    desctiption: Mapped[str] = mapped_column(
+    description: Mapped[str] = mapped_column(
         Text,
         nullable=False
     )
     slug: Mapped[str] = mapped_column(
         String(100),
-        nullable=False
+        nullable=False,
+        unique=True
     )
     is_published: Mapped[bool] = mapped_column(
         Boolean,
         default=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime
+        DateTime,
+        default=datetime.now
     )
-
+    posts = relationship("Post", back_populates="category")

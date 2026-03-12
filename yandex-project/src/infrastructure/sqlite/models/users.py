@@ -1,4 +1,4 @@
-from infrastructure.sqlite.database import Base
+from src.infrastructure.sqlite.database import Base
 
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -20,9 +20,12 @@ class User(Base):
         unique=True
     )
     email: Mapped[str] = mapped_column(
-        nullable=False
+        String(100),
+        nullable=False,
+        unique=True
     )
     password: Mapped[str] = mapped_column(
+        String(200),
         nullable=False
     )
     first_name: Mapped[str] = mapped_column(

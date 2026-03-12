@@ -1,7 +1,7 @@
 
-from infrastructure.sqlite.database import Base
+from src.infrastructure.sqlite.database import Base
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from sqlalchemy import String, Text, DateTime, Boolean, ForeignKey
 
@@ -48,8 +48,14 @@ class Post(Base):
         default=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime
+        DateTime,
+        default=datetime.now
     )
+
+    author = relationship("User", back_populates="posts")
+    location = relationship("Location", back_populates="posts")
+    category = relationship("Category", back_populates="posts")
+    comments = relationship("Comment", back_populates="posts")
 
 class Comment(Base):
     __tablename__ = "comments"
@@ -72,5 +78,11 @@ class Comment(Base):
         nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime
+        DateTime,
+        default=datetime.now
     )
+    
+    post = relationship("Post", back_populates="comments")
+    author = relationship("User", back_populates="comments")
+
+
