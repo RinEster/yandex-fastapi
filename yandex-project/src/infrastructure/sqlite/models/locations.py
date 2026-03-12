@@ -16,8 +16,7 @@ class Location(Base):
     )
     name: Mapped[str] = mapped_column(
         String(100),
-        nullable=False,
-        unique=True
+        nullable=False
     )
     is_published: Mapped[bool] = mapped_column(
         Boolean,
@@ -28,5 +27,5 @@ class Location(Base):
         default=datetime.now
     )
 
-    posts = relationship("Post", back_populates="location")
+    #posts = relationship("Post", back_populates="location")
 

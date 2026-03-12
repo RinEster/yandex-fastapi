@@ -1,17 +1,16 @@
 from typing import List
-
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.locations import LocationRepository
 from schemas.locations import Location as LocationSchema
 
-class GetAllLocationsUseCase:
+class GetPublishedLocationsUseCase:
     def __init__(self):
         self._database = database
         self._repo = LocationRepository()
-
+    
     async def execute(self) -> List[LocationSchema]:
         with self._database.session() as session:
-            locations = self._repo.get_all(session)
+            locations = self._repo.get_published(session)
             
             result = []
             for location in locations:

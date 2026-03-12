@@ -9,6 +9,38 @@ from domain.user.use_cases.update_user_password import UpdateUserPasswordUseCase
 from domain.user.use_cases.update_user_name import UpdateUserNameUseCase
 from domain.user.use_cases.delete_user import DeleteUserUseCase
 
+from domain.location.use_cases.create_location import CreateLocationUseCase
+from domain.location.use_cases.get_all_locations import GetAllLocationsUseCase
+from domain.location.use_cases.get_location_by_id import GetLocationByIdUseCase
+from domain.location.use_cases.get_published import GetPublishedLocationsUseCase
+from domain.location.use_cases.update_name_location import UpdateLocationNameUseCase
+from domain.location.use_cases.delete_location import DeleteLocationUseCase
+
+
+def get_create_location_use_case() -> CreateLocationUseCase:
+    return CreateLocationUseCase()
+
+
+def get_get_all_locations_use_case() -> GetAllLocationsUseCase:
+    return GetAllLocationsUseCase()
+
+
+def get_get_location_by_id_use_case() -> GetLocationByIdUseCase:
+    return GetLocationByIdUseCase()
+
+
+def get_get_published_locations_use_case() -> GetPublishedLocationsUseCase:
+    return GetPublishedLocationsUseCase()
+
+
+def get_update_location_name_use_case() -> UpdateLocationNameUseCase:
+    return UpdateLocationNameUseCase()
+
+
+def get_delete_location_use_case() -> DeleteLocationUseCase:
+    return DeleteLocationUseCase()
+
+
 def get_create_user_use_case() -> CreateUserUseCase:
     return CreateUserUseCase()
 
