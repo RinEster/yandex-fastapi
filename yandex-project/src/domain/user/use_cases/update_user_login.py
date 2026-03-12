@@ -1,3 +1,4 @@
+from pydantic import SecretStr
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.users import UserRepository
 from schemas.users import User as UserSchema
@@ -18,5 +19,14 @@ class UpdateUserLoginUseCase:
                 raise ValueError("Пользователь с данным логином уже существует")
             
             updated = self._repo.update_login(session, user_id, new_login)
-            
-            return UserSchema.model_validate(obj=updated)
+           
+            user_dict = {
+                "id": updated.id,
+                "login": updated.login,
+                "email": updated.email,
+                "password": SecretStr(updated.password),
+                "first_name": updated.first_name,
+                "second_name": updated.second_name
+            }
+
+            return UserSchema.model_validate(obj=user_dict)
