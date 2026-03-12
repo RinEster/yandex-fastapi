@@ -4,8 +4,9 @@ from schemas.users import User
 from schemas.categories import Category
 from schemas.locations import Location
 from datetime import datetime
-#base 64 или папка с картинками
+
 class Post(BaseModel):
+    id: int
     title: str = Field(..., max_length=256, description='Заголовок')
     text: str = Field(..., description='Текст')
     pub_date: datetime = Field(..., description='Дата и время публикации')
@@ -18,6 +19,7 @@ class Post(BaseModel):
 
 
 class Comment(BaseModel):
+    id: int
     post: Post = Field(...,description='Публикация')
     author: User = Field(...,description='Автор комментария')
     text: str = Field(...,description='Текст комментария')
