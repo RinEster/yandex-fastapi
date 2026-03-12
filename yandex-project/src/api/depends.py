@@ -17,6 +17,38 @@ from domain.location.use_cases.update_name_location import UpdateLocationNameUse
 from domain.location.use_cases.delete_location import DeleteLocationUseCase
 
 
+from domain.category.use_cases.create_category import CreateCategoryUseCase
+from domain.category.use_cases.get_all_categories import GetAllCategoriesUseCase
+from domain.category.use_cases.get_category_by_id import GetCategoryByIdUseCase
+from domain.category.use_cases.get_published import GetPublishedCategoriesUseCase
+from domain.category.use_cases.update_category import UpdateCategoryUseCase
+from domain.category.use_cases.delete_category import DeleteCategoryUseCase
+
+
+def get_create_category_use_case() -> CreateCategoryUseCase:
+    return CreateCategoryUseCase()
+
+
+def get_get_all_categories_use_case() -> GetAllCategoriesUseCase:
+    return GetAllCategoriesUseCase()
+
+
+def get_get_category_by_id_use_case() -> GetCategoryByIdUseCase:
+    return GetCategoryByIdUseCase()
+
+
+def get_get_published_categories_use_case() -> GetPublishedCategoriesUseCase:
+    return GetPublishedCategoriesUseCase()
+
+
+def get_update_category_use_case() -> UpdateCategoryUseCase:
+    return UpdateCategoryUseCase()
+
+
+def get_delete_category_use_case() -> DeleteCategoryUseCase:
+    return DeleteCategoryUseCase()
+
+
 def get_create_location_use_case() -> CreateLocationUseCase:
     return CreateLocationUseCase()
 
