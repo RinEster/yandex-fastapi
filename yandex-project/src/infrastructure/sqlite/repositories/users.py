@@ -64,11 +64,11 @@ class UserRepository:
         second_name: str | None = None
     ) -> User:
         user = User(
-        login=login,
-        email=email,
-        password=password,
-        first_name=first_name,
-        second_name=second_name
+            login=login,
+            email=email,
+            password=password,
+            first_name=first_name,
+            second_name=second_name
         )
         session.add(user)
         session.commit()
