@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 
 class Database:
     def __init__(self):
-        self._db_url = "sqlite:///./sqlite.db"
+        self._db_url = "sqlite:////home/rinester/rinEster/yandex-fastapi/yandex-project/sqlite.db"
         self._engine = create_engine(url=self._db_url)
 
     @contextmanager
