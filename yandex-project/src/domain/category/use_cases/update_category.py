@@ -28,7 +28,6 @@ class UpdateCategoryUseCase:
                 slug,
                 is_published
             )
-            session.commit()
             
             category_dict = {
                 "id": updated.id,

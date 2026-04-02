@@ -51,25 +51,25 @@ class CategoryRepository:
             created_at=datetime.now()
         )
         session.add(category)
-        session.commit()
+        session.flush()
         return category
 
     def update(
         self,
         session: Session,
-        location_id: int,
+        category_id: int,
         title:str,
         description: str,
         slug: str,
         is_published: bool = True
     ) -> Category:
-        category = self.get_by_id(session,location_id)
+        category = self.get_by_id(session,category_id)
         if category:
             category.title=title
             category.description=description
             category.slug=slug
             category.is_published=is_published
-            session.commit()
+            session.flush()
         return category
 
     def delete(
@@ -80,7 +80,7 @@ class CategoryRepository:
         category = self.get_by_id(session,category_id)
         if category:
             session.delete(category)
-            session.commit()
+            session.flush()
             return True
         return False
 

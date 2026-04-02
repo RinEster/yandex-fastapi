@@ -22,7 +22,6 @@ class CreateCategoryUseCase:
                 slug=slug,
                 is_published=is_published
             )
-            session.commit()
             
             category_dict = {
                 "id": category.id,
