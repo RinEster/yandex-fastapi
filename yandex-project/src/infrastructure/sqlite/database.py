@@ -24,6 +24,8 @@ class Database:
         except Exception:
             session.rollback()
             raise
+        finally:
+            session.close()
 
 
 database = Database()
