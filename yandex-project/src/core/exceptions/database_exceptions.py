@@ -6,7 +6,7 @@ class UserNotFoundException(BaseDatabaseException):
     pass
 
 
-class UserAlreadyExistsException(BaseDatabaseException):
+class UserLoginAlreadyExistsException(BaseDatabaseException):
     pass
 
 
