@@ -47,7 +47,7 @@ class LocationRepository:
             created_at=datetime.now()
         )
         session.add(location)
-        session.commit()
+        session.flush()
         return location
 
     def update_name(
@@ -59,7 +59,7 @@ class LocationRepository:
         location = self.get_by_id(session,location_id)
         if location:
             location.name=new_name
-            session.commit()
+            session.flush()
         return location
         
     def delete_location(
@@ -70,7 +70,7 @@ class LocationRepository:
         location = self.get_by_id(session, location_id)
         if location:
             session.delete(location)
-            session.commit()
+            session.flush()
             return True
         return False
 

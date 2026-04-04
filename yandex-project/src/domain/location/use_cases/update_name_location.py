@@ -14,7 +14,6 @@ class UpdateLocationNameUseCase:
                 raise ValueError("Местоположение не найдено")
             
             updated = self._repo.update_name(session, location_id, new_name)
-            session.commit()
            
             location_data = {
                 "id":updated.id,

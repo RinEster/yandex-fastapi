@@ -49,7 +49,7 @@ class PostRepository:
             created_at=datetime.now()
         )
         session.add(post)
-        session.commit()
+        session.flush()
         return post
 
     def update(
@@ -71,7 +71,7 @@ class PostRepository:
             post.category_id = category_id
             post.image = image
             post.is_published = is_published
-            session.commit()
+            session.flush()
         return post
 
     def delete(
@@ -82,6 +82,6 @@ class PostRepository:
         post = self.get_by_id(session, post_id)
         if post:
             session.delete(post)
-            session.commit()
+            session.flush()
             return True
         return False

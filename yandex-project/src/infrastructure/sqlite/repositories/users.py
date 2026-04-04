@@ -10,7 +10,6 @@ class UserRepository:
         self._model: Type[User] = User
 
 
-    #все пользователи
     def get_all_user(
         self,
         session: Session
@@ -20,7 +19,6 @@ class UserRepository:
         )
         return query
 
-    #конкретный пользователь
     def get_user_by_id(
         self,
         session: Session,
@@ -71,7 +69,7 @@ class UserRepository:
             second_name=second_name
         )
         session.add(user)
-        session.commit()
+        session.flush()
         return user
 
     def update_login(
@@ -83,7 +81,7 @@ class UserRepository:
         user = self.get_user_by_id(session, user_id)
         if user:
             user.login = new_login
-            session.commit()
+            session.flush()
         return user
     
     def update_email(
@@ -95,7 +93,7 @@ class UserRepository:
         user = self.get_user_by_id(session, user_id)
         if user:
             user.email = new_email
-            session.commit()
+            session.flush()
         return user
     
     def update_password(
@@ -107,7 +105,7 @@ class UserRepository:
         user = self.get_user_by_id(session, user_id)
         if user:
             user.password = new_password
-            session.commit()
+            session.flush()
         return user
     
     def update_name(
@@ -123,7 +121,7 @@ class UserRepository:
                 user.first_name = first_name
             if second_name is not None:
                 user.second_name = second_name
-            session.commit()
+            session.flush()
         return user
 
     def delete_user(
@@ -134,7 +132,7 @@ class UserRepository:
         user = self.get_user_by_id(session, user_id)
         if user:
             session.delete(user)
-            session.commit()
+            session.flush()
             return True
         return False
 
