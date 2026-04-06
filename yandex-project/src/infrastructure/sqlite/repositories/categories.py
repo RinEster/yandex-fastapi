@@ -140,9 +140,6 @@ class CategoryRepository:
         category_id: int
     )-> None:
         category = self.get_by_id(session,category_id)
-        if category:
-            session.delete(category)
-            session.flush()
-        else:
-            raise CategoryNotFoundException
+        session.delete(category)
+        session.flush()
 

@@ -25,6 +25,8 @@ class CategoryNotFoundException(BaseDatabaseException):
 class CategorySlugAlreadyExistsException(BaseDatabaseException):
     pass
 
+class CategoryTitleAlreadyExistsException(BaseDatabaseException):
+    pass
 
 class LocationNotFoundException(BaseDatabaseException):
     pass
