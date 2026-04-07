@@ -47,7 +47,7 @@ class UserRepository:
         )
 
         if not query:
-            raise UserNotFoundException
+            raise UserNotFoundException()
 
         return query
 
@@ -64,7 +64,7 @@ class UserRepository:
         user = query.scalar()
 
         if not user:
-            raise UserNotFoundException
+            raise UserNotFoundException()
 
         return user
 
@@ -79,7 +79,7 @@ class UserRepository:
         )
         user = query.scalar()
         if not user:
-            raise UserNotFoundException
+            raise UserNotFoundException()
         return user
 
     def get_user_by_email(
@@ -93,7 +93,7 @@ class UserRepository:
         )
         user = query.scalar()
         if not user:
-            raise UserNotFoundException
+            raise UserNotFoundException()
         return user
 
     def create(
@@ -107,10 +107,10 @@ class UserRepository:
     ) -> User:
 
         if self.chech_login_exists(session,login):
-            raise UserLoginAlreadyExistsException
+            raise UserLoginAlreadyExistsException()
 
         if self.check_email_exists(session, email):
-            raise UserEmailAlreadyExistsException
+            raise UserEmailAlreadyExistsException()
 
         user = User(
             login=login,
@@ -138,7 +138,7 @@ class UserRepository:
                 .scalar()
             )
             if existing_user and existing_user.id != user_id:
-                raise UserLoginAlreadyExistsException
+                raise UserLoginAlreadyExistsException()
 
         user.login = new_login
         session.flush()
@@ -160,7 +160,7 @@ class UserRepository:
                 .scalar()
             )
             if existing_user and existing_user.id != user_id:
-                raise UserEmailAlreadyExistsException
+                raise UserEmailAlreadyExistsException()
         
         user.email = new_email
         session.flush()
@@ -202,6 +202,6 @@ class UserRepository:
             session.delete(user)
             session.flush()
         else:
-            raise UserNotFoundException
+            raise UserNotFoundException()
 
 

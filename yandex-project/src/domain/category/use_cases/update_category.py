@@ -1,6 +1,19 @@
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.categories import CategoryRepository
-from schemas.categories import Category as CategorySchema
+from schemas.categories import CategoryResponse, CategoryUpdate
+from core.exceptions.database_exceptions import (
+    CategoryNotFoundException,
+    CategoryTitleAlreadyExistsException,
+    CategorySlugAlreadyExistsException
+)
+from core.exceptions.domain_exception import (
+    CategoryNotFoundByIdException,
+    CategoryTitleIsNotUniqueException,
+    CategorySlugIsNotUniqueException
+)
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UpdateCategoryUseCase:
     def __init__(self):
@@ -10,32 +23,26 @@ class UpdateCategoryUseCase:
     async def execute(
         self,
         category_id: int,
-        title: str,
-        description: str,
-        slug: str,
-        is_published: bool = True
-    ) -> CategorySchema:
+        data: CategoryUpdate
+    ) -> CategoryResponse:
         with self._database.session() as session:
-            category = self._repo.get_by_id(session, category_id)
-            if not category:
-                raise ValueError("Категория не найдена")
+            try:
+                category = self._repo.update(
+                    session=session,
+                    category_id=category_id,
+                    data=data
+                )
+            except CategoryNotFoundException:
+                error = CategoryNotFoundByIdException(id=category_id)
+                logger.error(error.get_detail())
+                raise error
+            except CategoryTitleAlreadyExistsException:
+                error = CategoryTitleIsNotUniqueException(title=data.title)
+                logger.error(error.get_detail())
+                raise error
+            except CategorySlugAlreadyExistsException:
+                error = CategorySlugIsNotUniqueException(slug=data.slug)
+                logger.error(error.get_detail())
+                raise error
             
-            updated = self._repo.update(
-                session,
-                category_id,
-                title,
-                description,
-                slug,
-                is_published
-            )
-            
-            category_dict = {
-                "id": updated.id,
-                "title": updated.title,
-                "description": updated.description,
-                "slug": updated.slug,
-                "is_published": updated.is_published,
-                "created_at": updated.created_at
-            }
-            
-            return CategorySchema.model_validate(obj=category_dict)
+            return CategoryResponse.model_validate(obj=category)

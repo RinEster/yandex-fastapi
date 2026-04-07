@@ -43,7 +43,7 @@ class LocationRepository:
         )
         location = query.scalar()
         if not location:
-            raise LocationNotFoundException
+            raise LocationNotFoundException()
         return location
 
     def get_published(
@@ -63,7 +63,7 @@ class LocationRepository:
         is_published: bool = True
     ) -> Location:
         if self.check_name_exists(session, name):
-            raise LocationNameAlreadyExistsException
+            raise LocationNameAlreadyExistsException()
         location = self._model(
             name=name,
             is_published=is_published,
@@ -83,7 +83,7 @@ class LocationRepository:
         
         if location.name != new_name:
             if self.check_name_exists(session, new_name):
-                raise LocationNameAlreadyExistsException
+                raise LocationNameAlreadyExistsException()
         location.name=new_name
         session.flush()
         return location

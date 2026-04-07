@@ -23,6 +23,7 @@ from domain.category.use_cases.get_category_by_id import GetCategoryByIdUseCase
 from domain.category.use_cases.get_published import GetPublishedCategoriesUseCase
 from domain.category.use_cases.update_category import UpdateCategoryUseCase
 from domain.category.use_cases.delete_category import DeleteCategoryUseCase
+from domain.category.use_cases.get_by_slug import GetCategoryBySlugUseCase
 
 from domain.posts.use_cases.get_all_posts import GetAllPostsUseCase
 from domain.posts.use_cases.get_post_by_id import GetPostByIdUseCase
@@ -51,27 +52,29 @@ def get_delete_post_use_case() -> DeletePostUseCase:
     return DeletePostUseCase()
 
 
-def get_create_category_use_case() -> CreateCategoryUseCase:
+def create_category_use_case() -> CreateCategoryUseCase:
     return CreateCategoryUseCase()
 
+def get_category_by_slug_use_case() -> GetCategoryBySlugUseCase:
+    return GetCategoryBySlugUseCase()
 
-def get_get_all_categories_use_case() -> GetAllCategoriesUseCase:
+def get_all_categories_use_case() -> GetAllCategoriesUseCase:
     return GetAllCategoriesUseCase()
 
 
-def get_get_category_by_id_use_case() -> GetCategoryByIdUseCase:
+def get_category_by_id_use_case() -> GetCategoryByIdUseCase:
     return GetCategoryByIdUseCase()
 
 
-def get_get_published_categories_use_case() -> GetPublishedCategoriesUseCase:
+def get_published_categories_use_case() -> GetPublishedCategoriesUseCase:
     return GetPublishedCategoriesUseCase()
 
 
-def get_update_category_use_case() -> UpdateCategoryUseCase:
+def update_category_use_case() -> UpdateCategoryUseCase:
     return UpdateCategoryUseCase()
 
 
-def get_delete_category_use_case() -> DeleteCategoryUseCase:
+def delete_category_use_case() -> DeleteCategoryUseCase:
     return DeleteCategoryUseCase()
 
 
