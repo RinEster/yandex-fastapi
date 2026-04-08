@@ -1,25 +1,16 @@
 from typing import List
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.locations import LocationRepository
-from schemas.locations import Location as LocationSchema
+from schemas.locations import LocationResponce
 
 class GetPublishedLocationsUseCase:
     def __init__(self):
         self._database = database
         self._repo = LocationRepository()
     
-    async def execute(self) -> List[LocationSchema]:
+    async def execute(self) -> List[LocationResponce]:
         with self._database.session() as session:
             locations = self._repo.get_published(session)
             
-            result = []
-            for location in locations:
-                location_dict = {
-                    "id": location.id,
-                    "name": location.name,
-                    "is_published": location.is_published,
-                    "created_at": location.created_at
-                }
-                result.append(LocationSchema.model_validate(obj=location_dict))
-            
-            return result
+            return [LocationResponce.model_validate(obj=location)
+                      for location in locations]
