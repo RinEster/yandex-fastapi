@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Type, List
-
+from sqlalchemy import insert
 from sqlalchemy.orm import Session
 
 from infrastructure.sqlite.models.locations import Location
@@ -9,6 +9,9 @@ from core.exceptions.database_exceptions import(
     LocationNameAlreadyExistsException,
     LocationNotFoundException
 )
+
+from schemas.locations import LocationCreate, LocationResponce, LocationUpdate
+
 class LocationRepository:
     def __init__(self):
         self._model: Type[Location] = Location
@@ -58,19 +61,24 @@ class LocationRepository:
 
     def create(
         self, 
-        session: Session, 
-        name: str, 
-        is_published: bool = True
+        session: Session,
+        data: LocationCreate 
     ) -> Location:
-        if self.check_name_exists(session, name):
+        if self.check_name_exists(session, data.name):
             raise LocationNameAlreadyExistsException()
-        location = self._model(
-            name=name,
-            is_published=is_published,
-            created_at=datetime.now()
+
+        if data.created_at is None:
+            data.created_at = datetime.now()
+        
+        query = (
+            session.insert(self._model)
+            .values(data.model_dump(exclude_none=True))
+            .returning(self._model)
         )
-        session.add(location)
+
+        location = session.scalar(query)
         session.flush()
+
         return location
 
     def update_name(
@@ -80,7 +88,6 @@ class LocationRepository:
         new_name: str
     ) -> Location:
         location = self.get_by_id(session,location_id)
-        
         if location.name != new_name:
             if self.check_name_exists(session, new_name):
                 raise LocationNameAlreadyExistsException()
