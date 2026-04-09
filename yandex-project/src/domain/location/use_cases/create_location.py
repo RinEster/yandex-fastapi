@@ -1,10 +1,10 @@
 from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.locations import LocationRepository
 from schemas.locations import LocationResponce, LocationCreate
-from src.core.exceptions.database_exceptions import LocationNameAlreadyExistsException
+from core.exceptions.database_exceptions import LocationNameAlreadyExistsException
 
 
-from src.core.exceptions.domain_exception import LocationTitleIsNotUniqueException
+from core.exceptions.domain_exception import LocationTitleIsNotUniqueException
 
 import logging
 

@@ -13,7 +13,7 @@ from domain.location.use_cases.create_location import CreateLocationUseCase
 from domain.location.use_cases.get_all_locations import GetAllLocationsUseCase
 from domain.location.use_cases.get_location_by_id import GetLocationByIdUseCase
 from domain.location.use_cases.get_published import GetPublishedLocationsUseCase
-from domain.location.use_cases.update_name_location import UpdateLocationNameUseCase
+from domain.location.use_cases.update_location import UpdateLocationUseCase
 from domain.location.use_cases.delete_location import DeleteLocationUseCase
 
 
@@ -78,27 +78,27 @@ def delete_category_use_case() -> DeleteCategoryUseCase:
     return DeleteCategoryUseCase()
 
 
-def get_create_location_use_case() -> CreateLocationUseCase:
+def create_location_use_case() -> CreateLocationUseCase:
     return CreateLocationUseCase()
 
 
-def get_get_all_locations_use_case() -> GetAllLocationsUseCase:
+def get_all_locations_use_case() -> GetAllLocationsUseCase:
     return GetAllLocationsUseCase()
 
 
-def get_get_location_by_id_use_case() -> GetLocationByIdUseCase:
+def get_location_by_id_use_case() -> GetLocationByIdUseCase:
     return GetLocationByIdUseCase()
 
 
-def get_get_published_locations_use_case() -> GetPublishedLocationsUseCase:
+def get_published_locations_use_case() -> GetPublishedLocationsUseCase:
     return GetPublishedLocationsUseCase()
 
 
-def get_update_location_name_use_case() -> UpdateLocationNameUseCase:
-    return UpdateLocationNameUseCase()
+def update_location_use_case() -> UpdateLocationUseCase:
+    return UpdateLocationUseCase()
 
 
-def get_delete_location_use_case() -> DeleteLocationUseCase:
+def delete_location_use_case() -> DeleteLocationUseCase:
     return DeleteLocationUseCase()
 
 

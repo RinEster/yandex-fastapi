@@ -2,21 +2,15 @@ from infrastructure.sqlite.database import database
 from infrastructure.sqlite.repositories.locations import LocationRepository
 from schemas.locations import LocationResponce, LocationUpdate
 
-from core.exceptions.database_exceptions import(
-    LocationNotFoundException,
-    LocationNameAlreadyExistsException
-)
+from core.exceptions.database_exceptions import LocationNotFoundException
 
-from core.exceptions.domain_exception import(
-    LocationNotFoundByIdException,
-    LocationTitleIsNotUniqueException
-)
+from core.exceptions.domain_exception import LocationNotFoundByIdException
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-class UpdateLocationNameUseCase:
+class UpdateLocationUseCase:
     def __init__(self):
         self._database = database
         self._repo = LocationRepository()

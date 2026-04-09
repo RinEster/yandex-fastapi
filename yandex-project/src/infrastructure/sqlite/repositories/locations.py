@@ -10,7 +10,7 @@ from core.exceptions.database_exceptions import(
     LocationNotFoundException
 )
 
-from schemas.locations import LocationCreate, LocationResponce, LocationUpdate
+from schemas.locations import LocationCreate, LocationUpdate
 
 class LocationRepository:
     def __init__(self):
@@ -71,7 +71,7 @@ class LocationRepository:
             data.created_at = datetime.now()
         
         query = (
-            session.insert(self._model)
+            insert(self._model)
             .values(data.model_dump(exclude_none=True))
             .returning(self._model)
         )
@@ -81,20 +81,30 @@ class LocationRepository:
 
         return location
 
-    def update_name(
+    def update(
         self,
         session: Session,
         location_id: int,
-        new_name: str
+        data: LocationUpdate
     ) -> Location:
-        location = self.get_by_id(session,location_id)
-        if location.name != new_name:
-            if self.check_name_exists(session, new_name):
-                raise LocationNameAlreadyExistsException()
-        location.name=new_name
+        location = self.get_by_id(session, location_id)
+    
+        if data.name is not None:
+            if location.name != data.name:
+                if self.check_name_exists(session, data.name):
+                    raise LocationNameAlreadyExistsException()
+                location.name = data.name
+    
+        if data.is_published is not None:
+            location.is_published = data.is_published
+    
+        if data.created_at is not None:
+            location.created_at = data.created_at
+    
         session.flush()
-        return location
-        
+        return location        
+    
+
     def delete(
         self,
         session: Session,
