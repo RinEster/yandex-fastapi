@@ -1,3 +1,5 @@
+from pydantic import EmailStr
+
 class BaseDomainException(Exception):
     def __init__(self, detail: str) -> None:
         self._detail = detail
@@ -69,5 +71,40 @@ class UserNotFoundByLoginException(BaseDomainException):
 
     def __init__(self, login: str) -> None:
         self._exception_text_template = self._exception_text_template.format(login=login)
+
+        super().__init__(detail=self._exception_text_template)
+
+
+class UserNotFoundByIdException(BaseDomainException):
+    _exception_text_template = "Пользователь с id = {id} не найден"
+
+    def __init__(self, id: int) -> None:
+        self._exception_text_template = self._exception_text_template.format(id=id)
+
+        super().__init__(detail=self._exception_text_template)
+
+class UserNotFoundByEmailException(BaseDomainException):
+    _exception_text_template = "Пользователь с почтой '{email}' не найден"
+
+    def __init__(self, email: EmailStr) -> None:
+        self._exception_text_template = self._exception_text_template.format(email=email)
+
+        super().__init__(detail=self._exception_text_template)
+
+
+class UserLoginAlreadyExistsException(BaseDomainException):
+    _exception_text_template = "Пользователь с логином '{login}' уже существует"
+
+    def __init__(self, login: str) -> None:
+        self._exception_text_template = self._exception_text_template.format(login=login)
+
+        super().__init__(detail=self._exception_text_template)
+
+
+class UserEmailAlreadyExistsException(BaseDomainException):
+    _exception_text_template = "Пользователь с почтой '{email}' уже существует"
+
+    def __init__(self, email: EmailStr) -> None:
+        self._exception_text_template = self._exception_text_template.format(email=email)
 
         super().__init__(detail=self._exception_text_template)
