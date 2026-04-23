@@ -5,41 +5,37 @@ from pydantic import SecretStr, EmailStr
 
 users_router = APIRouter()
 
-users = []
-next_id = 1
+from typing import Annotated
+
+from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+
+from schemas.auth import Token
+from domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
+from domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
+from core.exceptions.domain_exceptions import WrongPasswordException, UserNotFoundByLoginException
+from api.depends import create_access_token_use_case, authenticate_user_use_case
+
+router = APIRouter()
 
 
-#получение всех существующих пользователей
-@users_router.get("/", status_code=status.HTTP_200_OK, response_model=list[User])
-async def get_users() -> list:
-    return users
+@router.post("/token", response_model=Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    auth_use_case: Annotated[AuthenticateUserUseCase, Depends(authenticate_user_use_case)],
+    create_token_use_case: CreateAccessTokenUseCase = Depends(create_access_token_use_case),
+) -> Token:
+    try:
+        user = await auth_use_case.execute(login=form_data.username, password=form_data.password)
+    except WrongPasswordException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=exc.get_detail(),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except UserNotFoundByLoginException as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.get_detail())
 
-#получение пользователя по конкретному id
-@users_router.get("/{user_id}", status_code=status.HTTP_200_OK, response_model=User)
-async def get_user(user_id: int) -> User:   
-    for user in users:
-        if user.id == user_id:
-            return user
-    
-    raise HTTPException(
-        detail="Пользователь не найден",
-        status_code=status.HTTP_404_NOT_FOUND
-    )
+    access_token = await create_token_use_case.execute(login=user.login)
 
-#добавление категории
-@users_router.post("/add", status_code=status.HTTP_201_CREATED, response_model=User)
-async def create_user(login: str, email: str, password: str, first_name: str = None, second_name: str = None) -> User:
-    global next_id
-    new_user = User(
-        id=next_id,
-        login=login,
-        email=email,
-        password=password,
-        first_name=first_name,
-        second_name=second_name
-    )
-
-    users.append(new_user)
-    next_id += 1
-
-    return new_user
+    return Token(access_token=access_token, token_type="bearer")

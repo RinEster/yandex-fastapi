@@ -56,4 +56,18 @@ class LocationNotFoundByIdException(BaseDomainException):
 
         super().__init__(detail=self._exception_text_template)
     
+class WrongPasswordException(BaseDomainException):
+    _exception_text = "Неверный пароль"
 
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text)
+
+
+
+class UserNotFoundByLoginException(BaseDomainException):
+    _exception_text_template = "Пользователь с логином='{login}' не найден"
+
+    def __init__(self, login: str) -> None:
+        self._exception_text_template = self._exception_text_template.format(login=login)
+
+        super().__init__(detail=self._exception_text_template)

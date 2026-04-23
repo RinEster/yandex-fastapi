@@ -31,6 +31,15 @@ from domain.posts.use_cases.create_post import CreatePostUseCase
 from domain.posts.use_cases.update_post import UpdatePostUseCase
 from domain.posts.use_cases.delete_post import DeletePostUseCase
 
+from domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
+from domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
+
+
+def authenticate_user_use_case() -> AuthenticateUserUseCase:
+    return AuthenticateUserUseCase()
+
+def create_access_token_use_case() -> CreateAccessTokenUseCase:
+    return CreateAccessTokenUseCase()
 
 def get_get_all_posts_use_case() -> GetAllPostsUseCase:
     return GetAllPostsUseCase()
