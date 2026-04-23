@@ -39,7 +39,7 @@ async def get_user_by_id(
     use_case = Depends(get_user_by_id_use_case)
 ) -> UserResponse:
     try:
-        return await use_case.execute(user_id=user_id, current_user=user)
+        return await use_case.execute(user_id=user_id)
     except UserNotFoundByIdException as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.get_detail())
 
@@ -51,7 +51,7 @@ async def get_user_by_login(
     use_case = Depends(get_user_by_login_use_case)
 ) -> UserResponse:
     try:
-        return await use_case.execute(login=login, current_user=user)
+        return await use_case.execute(login=login)
     except UserNotFoundByLoginException as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.get_detail())
 
@@ -63,7 +63,7 @@ async def get_user_by_email(
     use_case = Depends(get_user_by_email_use_case)
 ) -> UserResponse:
     try:
-        return await use_case.execute(email=email, current_user=user)
+        return await use_case.execute(email=email)
     except UserNotFoundByEmailException as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.get_detail())
 
@@ -88,6 +88,6 @@ async def delete_user(
     use_case = Depends(delete_user_use_case)
 ):
     try:
-        await use_case.execute(user_id=user_id, current_user=user)
+        await use_case.execute(user_id=user_id)
     except UserNotFoundByIdException as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=exc.get_detail())

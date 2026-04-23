@@ -101,6 +101,7 @@ class UserLoginAlreadyExistsException(BaseDomainException):
         super().__init__(detail=self._exception_text_template)
 
 
+
 class UserEmailAlreadyExistsException(BaseDomainException):
     _exception_text_template = "Пользователь с почтой '{email}' уже существует"
 

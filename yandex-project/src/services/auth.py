@@ -36,13 +36,13 @@ class AuthService:
         except JWTError:
             raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
 
-        try:
-            with _database.session() as session:
-                user = _repo.get_user_by_login(session=session, login=login)
-        except UserNotFoundException:
-            raise CredentialsException(detail="Пользователь не найден")
+        with _database.session() as session:
+            user = _repo.get_user_by_login(session=session, login=login)
 
-        return UserSchema.model_validate(obj=user)
+            if not user:
+                raise CredentialsException(detail="Пользователь не найден")
+
+            return UserSchema.model_validate(user)
 
     @staticmethod
     async def get_current_user(

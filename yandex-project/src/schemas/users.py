@@ -5,7 +5,7 @@ class User(BaseModel):
     email: EmailStr
     first_name: str | None = Field(None, max_length=50)
     second_name: str | None = Field(None, max_length=50)
-
+    model_config = ConfigDict(from_attributes=True)
 
 class UserCreate(User):
     password: SecretStr = Field(..., min_length=8, max_length=128)
