@@ -1,11 +1,25 @@
-from pydantic import BaseModel, SecretStr, Field, EmailStr
-
+from pydantic import BaseModel, Field, EmailStr, SecretStr, ConfigDict, field_validator
 
 class User(BaseModel):
-    id: int
     login: str = Field(..., max_length=50)
     email: EmailStr
-    password: SecretStr
-    first_name: str | None = Field(None,max_length=50)
-    second_name: str | None = Field(None,max_length=50)
+    first_name: str | None = Field(None, max_length=50)
+    second_name: str | None = Field(None, max_length=50)
+
+
+class UserCreate(User):
+    password: SecretStr = Field(..., min_length=8, max_length=128)
     
+    @field_validator("password", mode="after")
+    @staticmethod
+    def check_password(password: SecretStr) -> SecretStr:
+        if len(password) < 8:
+            raise ValueError("Пароль должен быть не менее 8 символов")
+
+        return password
+
+
+class UserResponse(User):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+

@@ -1,14 +1,17 @@
-from typing import List, Type
+from typing import Type, List
 
 from sqlalchemy.orm import Session
-
+from sqlalchemy import  select, or_, insert
 from infrastructure.sqlite.models.users import User
-
-from core.exceptions.database_exceptions import(
+from resources.auth import get_password_hash
+from core.exceptions.database_exceptions import (
     UserNotFoundException,
     UserLoginAlreadyExistsException,
     UserEmailAlreadyExistsException
 )
+
+from schemas.users import UserCreate
+
 
 class UserRepository:
     def __init__(self):
@@ -45,9 +48,6 @@ class UserRepository:
         query = (
             session.query(self._model).all()
         )
-
-        if not query:
-            raise UserNotFoundException()
 
         return query
 
@@ -98,110 +98,46 @@ class UserRepository:
 
     def create(
         self,
-        session:Session,
-        login: str,
-        email: str,
-        password: str,
-        first_name: str | None = None,
-        second_name: str | None = None
+        session: Session,
+        data: UserCreate    
     ) -> User:
 
-        if self.chech_login_exists(session,login):
-            raise UserLoginAlreadyExistsException()
-
-        if self.check_email_exists(session, email):
-            raise UserEmailAlreadyExistsException()
-
-        user = User(
-            login=login,
-            email=email,
-            password=password,
-            first_name=first_name,
-            second_name=second_name
+        exist_user = session.scalar(
+            select(self._model).where(
+                or_(self._model.login == data.login,
+                    self._model.email == data.email,)
+            )
         )
-        session.add(user)
-        session.flush()
-        return user
 
-    def update_login(
-        self,
-        session: Session,
-        user_id: int,
-        new_login: str
-    ) -> User:
-        user = self.get_user_by_id(session, user_id)
-        
-        if self.chech_login_exists(session, new_login):
-            existing_user = (
-                session.query(self._model)
-                .where(self._model.login == new_login)
-                .scalar()
-            )
-            if existing_user and existing_user.id != user_id:
+        if exist_user is not None:
+            if exist_user.login == data.login:
                 raise UserLoginAlreadyExistsException()
-
-        user.login = new_login
-        session.flush()
-
-        return user
-    
-    def update_email(
-        self, 
-        session: Session,
-        user_id: int,
-        new_email: str
-    ) -> User:
-        user = self.get_user_by_id(session, user_id)
-        
-        if self.check_email_exists(session, new_email):
-            existing_user = (
-                session.query(self._model)
-                .where(self._model.email == new_email)
-                .scalar()
-            )
-            if existing_user and existing_user.id != user_id:
+            if exist_user.email == data.email:
                 raise UserEmailAlreadyExistsException()
-        
-        user.email = new_email
+
+        password = data.password.get_secret_value()
+        hashed_password = get_password_hash(password)
+
+        user_data = data.model_dump(exclude={"password"})
+        user_data["password"] = hashed_password
+
+        query = (
+            insert(self._model)
+            .values(user_data)
+            .returning(self._model)
+        )
+
+        user = session.scalar(query)
         session.flush()
-        return user
-    
-    def update_password(
-        self,
-        session: Session,
-        user_id: int,
-        new_password: str
-    ) -> User:
-        user = self.get_user_by_id(session, user_id)
-        user.password = new_password
-        session.flush()
-        return user
-    
-    def update_name(
-        self,
-        session: Session,
-        user_id: int,
-        first_name: str | None = None,
-        second_name: str | None = None
-    ) -> User:
-        user = self.get_user_by_id(session, user_id)
-        if first_name is not None:
-            user.first_name = first_name
-        if second_name is not None:
-            user.second_name = second_name
-        session.flush()
+
         return user
 
-    def delete_user(
-        self,
-        session: Session,
-        user_id: int
+   
+    def delete(
+            self,
+            session: Session,
+            user_id: int
     ) -> None:
         user = self.get_user_by_id(session, user_id)
-        if user:
-            session.delete(user)
-            session.flush()
-        else:
-            raise UserNotFoundException()
-
-
+        session.delete(user)
+        session.flush()
