@@ -13,7 +13,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schemas.auth import Token
 from domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
 from domain.auth.use_cases.create_access_token import CreateAccessTokenUseCase
-from core.exceptions.domain_exceptions import WrongPasswordException, UserNotFoundByLoginException
+from core.exceptions.domain_exception import WrongPasswordException, UserNotFoundByLoginException
 from api.depends import create_access_token_use_case, authenticate_user_use_case
 
 router = APIRouter()
