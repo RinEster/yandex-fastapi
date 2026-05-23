@@ -3,15 +3,16 @@ from fastapi import Depends
 from pydantic import SecretStr
 from jose import JWTError, jwt
 
-from core.exceptions.auth_exceptions import CredentialsException
-from core.exceptions.database_exceptions import UserNotFoundException
-from schemas.users import UserResponse as UserSchema
-from resources.auth import oauth2_scheme
-from infrastructure.sqlite.database import (
-    database as sqlite_database,
+from application.core.exceptions.auth_exceptions import CredentialsException
+from application.core.exceptions.database_exceptions import UserNotFoundException
+from application.schemas.users import UserResponse
+from application.resources.auth import oauth2_scheme
+from application.infrastructure.sqlite.database import (
+    database as postgres_database,
     Database,
 )
-from infrastructure.sqlite.repositories.users import UserRepository
+from application.infrastructure.sqlite.repositories.users import UserRepository
+from application.core.config import setting
 
 AUTH_EXCEPTION_MESSAGE = "Невозможно проверить данные авторизации"
 SECRET_AUTH_KEY = SecretStr("DCTswSgPQuM3zSRM4g9FUFM5EAOr8ypfFwg7pK2eVV8")
