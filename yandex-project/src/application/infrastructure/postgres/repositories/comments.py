@@ -5,7 +5,7 @@ from typing import Type, List
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from application.schemas.comments import CommentBase, CommentCreate, CommentResponse, CommentUpdate
 from application.infrastructure.postgres.models.comments import Comment
 from application.infrastructure.postgres.models.posts import Post
 from application.infrastructure.postgres.models.categories import Category
@@ -13,8 +13,6 @@ from application.infrastructure.postgres.models.locations import Location
 from application.infrastructure.postgres.models.users import User
 from application.core.exceptions.database_exceptions import(
     PostNotFoundException,
-    CategoryNotFoundException,
-    LocationNotFoundException,
     UserNotFoundException,
     CommentNotFoundException
 )
@@ -26,97 +24,97 @@ class CommentRepository:
         self._post_model: Type[Post] = Post
         self._author_model: Type[User] = User
 
-    def get_all(
+    async def get_all(
         self,
-        session: Session
+        session: AsyncSession 
     ) -> List[Comment]:
-        query = session.query(self._model).all()
-        return query
+        query = select(self._model)
+        result = await session.execute(query)
+        return list(result.scalars().all())
     
-    def get_by_id(
+    async def get_by_id(
         self,
-        session: Session,
+        session: AsyncSession,
         comment_id: int
     ) -> Comment:
         query = (
-            session.query(self._model)
+            select(self._model)
             .where(self._model.id == comment_id)
         )
-        comment = query.scalar()
+        comment = await session.scalar(query)
         if not comment:
             raise CommentNotFoundException()
         return comment
 
-    def get_by_post_id(
+    async def get_by_post_id(
         self,
-        session: Session,
+        session: AsyncSession,
         post_id: int
     ) -> List[Comment]:
         query = (
-            session.query(self._model)
+            select(self._model)
             .where(self._model.post_id == post_id)
             .order_by(self._model.created_at.desc())
-            .all()
         )
-        return query
+        result = await session.execute(query)
+        return list(result.scalars().all())
 
-    def get_by_author_id(
+    async def get_by_author_id(
         self,
-        session: Session,
+        session: AsyncSession,
         author_id: int
     ) -> List[Comment]:
         query = (
-            session.query(self._model)
+            select(self._model)
             .where(self._model.author_id == author_id)
             .order_by(self._model.created_at.desc())
-            .all()
         )
-        return query
+        result = await session.execute(query)
+        return list(result.scalars().all())
 
-    def create(
+    async def create(
         self,
-        session: Session,
-        post_id: int,
+        session: AsyncSession,
         author_id: int,
-        text: str
+        data: CommentCreate
     ) -> Comment:
-        post = session.get(self._post_model, post_id)
+        post = await session.get(self._post_model, data.post_id)
         if not post:
             raise PostNotFoundException()
         
-        author = session.get(self._author_model, author_id)
+        author = await session.get(self._author_model, author_id)
         if not author:
             raise UserNotFoundException()
 
         comment = self._model(
-            post_id=post_id,
+            post_id=data.post_id,
             author_id=author_id,
-            text=text,
-            created_at=datetime.now()
+            text=data.text,
         )
         session.add(comment)
-        session.flush()
+        await session.flush()
         return comment
 
-    def update(
+    async def update(
         self,
-        session: Session,
+        session: AsyncSession,
         comment_id: int,
-        text: str
+        data: CommentUpdate
     ) -> Comment:
-        comment = self.get_by_id(session, comment_id)
-        
-        comment.text = text
-        session.flush()
+        comment = await self.get_by_id(session, comment_id)
+       
+        if data.text is not None:
+            comment.text = data.text
+        await session.flush()
         
         return comment
 
-    def delete(
+    async def delete(
         self,
-        session: Session,
+        session: AsyncSession,
         comment_id: int
     ) -> None:
-        comment = self.get_by_id(session, comment_id)
-        session.delete(comment)
-        session.flush()
+        comment = await self.get_by_id(session, comment_id)
+        await session.delete(comment)
+        await session.flush()
 
