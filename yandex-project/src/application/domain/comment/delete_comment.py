@@ -25,7 +25,6 @@ class DeleteCommentUseCase:
                 await self._repo.delete(
                     session=session, comment_id=comment_id
                 )
-                await session.commit()
             except CommentNotFoundException:
                 error = CommentNotFoundByIdException(id=comment_id)
                 logger.error(error.get_detail())

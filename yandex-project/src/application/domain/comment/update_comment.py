@@ -31,7 +31,6 @@ class UpdateCommentUseCase:
                 comment = await self._repo.update(
                     session=session, comment_id=comment_id, data=data
                 )
-                await session.commit()
             except CommentNotFoundException:
                 error = CommentNotFoundByIdException(id=comment_id)
                 logger.error(error.get_detail())

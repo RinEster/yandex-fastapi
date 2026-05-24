@@ -33,7 +33,6 @@ class CreateCommentUseCase:
                 comment = await self._repo.create(
                     session=session, author_id=author_id, data=data
                 )
-                await session.commit()
             except PostNotFoundException:
                 error = PostNotFoundByIdException(id=data.post_id)
                 logger.error(error.get_detail())
