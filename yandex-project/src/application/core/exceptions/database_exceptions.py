@@ -7,11 +7,15 @@ class UserNotFoundException(BaseDatabaseException):
 
 
 class UserLoginAlreadyExistsException(BaseDatabaseException):
-    pass
+    def __init__(self, login: str):
+        self.login = login
+        super().__init__(f"Login {login} already exists")
 
 
 class UserEmailAlreadyExistsException(BaseDatabaseException):
-    pass
+    def __init__(self, email: str):
+        self.email = email
+        super().__init__(f"Email {email} already exists")
 
 
 class PostNotFoundException(BaseDatabaseException):

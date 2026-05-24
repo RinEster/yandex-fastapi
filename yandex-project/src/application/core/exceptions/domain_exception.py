@@ -92,7 +92,7 @@ class UserNotFoundByEmailException(BaseDomainException):
         super().__init__(detail=self._exception_text_template)
 
 
-class UserLoginAlreadyExistsException(BaseDomainException):
+class UserLoginIsNotUniqueException(BaseDomainException):
     _exception_text_template = "Пользователь с логином '{login}' уже существует"
 
     def __init__(self, login: str) -> None:
@@ -102,10 +102,34 @@ class UserLoginAlreadyExistsException(BaseDomainException):
 
 
 
-class UserEmailAlreadyExistsException(BaseDomainException):
+class UserEmailIsNotUniqueException(BaseDomainException):
     _exception_text_template = "Пользователь с почтой '{email}' уже существует"
 
     def __init__(self, email: EmailStr) -> None:
         self._exception_text_template = self._exception_text_template.format(email=email)
+
+        super().__init__(detail=self._exception_text_template)
+
+class PostNotFoundByIdException(BaseDomainException):
+    _exception_text_template = "Пост с id = {id} не найден"
+
+    def __init__(self, id: int) -> None:
+        self._exception_text_template = self._exception_text_template.format(id=id)
+
+        super().__init__(detail=self._exception_text_template)
+
+class CommentNotFoundByIdException(BaseDomainException):
+    _exception_text_template = "Комментарий с id = {id} не найден"
+
+    def __init__(self, id: int) -> None:
+        self._exception_text_template = self._exception_text_template.format(id=id)
+
+        super().__init__(detail=self._exception_text_template)
+
+class LocationNameIsNotUniqueException(BaseDomainException):
+    _exception_text_template = "Локация с именем = '{name}' уже существует"
+
+    def __init__(self, name: str) -> None:
+        self._exception_text_template = self._exception_text_template.format(name=name)
 
         super().__init__(detail=self._exception_text_template)
