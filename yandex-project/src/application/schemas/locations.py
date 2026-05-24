@@ -1,21 +1,39 @@
-from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
-class Location(BaseModel):
-    name: str = Field(..., max_length=256, description='Название места')
-    is_published: bool = Field(True, description='Опубликовано')
-    created_at: datetime = Field(..., description='Добавлено')
+from pydantic import BaseModel, ConfigDict, Field
 
-class LocationResponce(Location):
+
+class LocationBase(BaseModel):
+    name: str = Field(
+        ...,
+        max_length=256,
+        description="Название места",
+    )
+    is_published: bool = Field(
+        True, description="Опубликовано"
+    )
+
+
+class LocationResponse(LocationBase):
     id: int
-    model_config = ConfigDict(from_attributes=True)
+    created_at: datetime = Field(
+        ..., description="Добавлено"
+    )
+    model_config = ConfigDict(
+        from_attributes=True
+    )
 
-class LocationCreate(Location):
+
+class LocationCreate(LocationBase):
     pass
 
+
 class LocationUpdate(BaseModel):
-    name: str | None = Field(None, max_length=256, description='Название места')
-    is_published: bool | None = Field(None, description='Опубликовано')
-    created_at: datetime | None = Field(None, description='Добавлено')
-
-
+    name: str | None = Field(
+        None,
+        max_length=256,
+        description="Название места",
+    )
+    is_published: bool | None = Field(
+        None, description="Опубликовано"
+    )
