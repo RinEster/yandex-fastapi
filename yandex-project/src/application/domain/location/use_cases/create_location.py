@@ -1,30 +1,39 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories.locations import LocationRepository
-from schemas.locations import LocationResponce, LocationCreate
-from core.exceptions.database_exceptions import LocationNameAlreadyExistsException
-
-
-from core.exceptions.domain_exception import LocationTitleIsNotUniqueException
-
 import logging
 
+from application.core.exceptions.database_exceptions import (
+    LocationNameAlreadyExistsException,
+)
+from application.core.exceptions.domain_exception import (
+    LocationNameIsNotUniqueException,
+)
+from application.infrastructure.postgres.database import database
+from application.infrastructure.postgres.repositories.locations import (
+    LocationRepository,
+)
+from application.schemas.locations import (
+    LocationCreate,
+    LocationResponse,
+)
+
 logger = logging.getLogger(__name__)
+
 
 class CreateLocationUseCase:
     def __init__(self):
         self._database = database
         self._repo = LocationRepository()
 
-    async def execute(
-        self,
-        data: LocationCreate
-    ) -> LocationResponce:
-        with self._database.session() as session:
+    async def execute(self, data: LocationCreate) -> LocationResponse:
+        async with self._database.session() as session:
             try:
-                location = self._repo.create(session=session, data=data)
+                location = await self._repo.create(
+                    session=session, data=data
+                )
             except LocationNameAlreadyExistsException:
-                error = LocationTitleIsNotUniqueException(name=data.name)
+                error = LocationNameIsNotUniqueException(
+                    name=data.name
+                )
                 logger.error(error.get_detail())
                 raise error
 
-            return LocationResponce.model_validate(obj=location)
+            return LocationResponse.model_validate(obj=location)

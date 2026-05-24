@@ -1,16 +1,21 @@
 from typing import List
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories.locations import LocationRepository
-from schemas.locations import LocationResponce
+
+from application.infrastructure.postgres.database import database
+from application.infrastructure.postgres.repositories.locations import (
+    LocationRepository,
+)
+from application.schemas.locations import LocationResponse
+
 
 class GetPublishedLocationsUseCase:
     def __init__(self):
         self._database = database
         self._repo = LocationRepository()
-    
-    async def execute(self) -> List[LocationResponce]:
-        with self._database.session() as session:
-            locations = self._repo.get_published(session)
-            
-            return [LocationResponce.model_validate(obj=location)
-                      for location in locations]
+
+    async def execute(self) -> List[LocationResponse]:
+        async with self._database.session() as session:
+            locations = await self._repo.get_published(session)
+            return [
+                LocationResponse.model_validate(obj=loc)
+                for loc in locations
+            ]
