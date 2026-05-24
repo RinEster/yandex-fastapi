@@ -1,19 +1,26 @@
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories.categories import CategoryRepository
-from schemas.categories import CategoryResponse, CategoryUpdate
-from core.exceptions.database_exceptions import (
-    CategoryNotFoundException,
-    CategoryTitleAlreadyExistsException,
-    CategorySlugAlreadyExistsException
-)
-from core.exceptions.domain_exception import (
-    CategoryNotFoundByIdException,
-    CategoryTitleIsNotUniqueException,
-    CategorySlugIsNotUniqueException
-)
 import logging
 
+from application.core.exceptions.database_exceptions import (
+    CategoryNotFoundException,
+    CategorySlugAlreadyExistsException,
+    CategoryTitleAlreadyExistsException,
+)
+from application.core.exceptions.domain_exception import (
+    CategoryNotFoundByIdException,
+    CategorySlugIsNotUniqueException,
+    CategoryTitleIsNotUniqueException,
+)
+from application.infrastructure.postgres.database import database
+from application.infrastructure.postgres.repositories.categories import (
+    CategoryRepository,
+)
+from application.schemas.categories import (
+    CategoryResponse,
+    CategoryUpdate,
+)
+
 logger = logging.getLogger(__name__)
+
 
 class UpdateCategoryUseCase:
     def __init__(self):
@@ -21,28 +28,36 @@ class UpdateCategoryUseCase:
         self._repo = CategoryRepository()
 
     async def execute(
-        self,
-        category_id: int,
-        data: CategoryUpdate
+        self, category_id: int, data: CategoryUpdate
     ) -> CategoryResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                category = self._repo.update(
+                category = await self._repo.update(
                     session=session,
                     category_id=category_id,
-                    data=data
+                    data=data,
                 )
             except CategoryNotFoundException:
                 error = CategoryNotFoundByIdException(id=category_id)
                 logger.error(error.get_detail())
                 raise error
-            except CategoryTitleAlreadyExistsException:
-                error = CategoryTitleIsNotUniqueException(title=data.title)
+            except CategoryTitleAlreadyExistsException as e:
+                failed_title = data.title or getattr(
+                    e, "title", "Указанный заголовок"
+                )
+                error = CategoryTitleIsNotUniqueException(
+                    title=failed_title
+                )
                 logger.error(error.get_detail())
                 raise error
-            except CategorySlugAlreadyExistsException:
-                error = CategorySlugIsNotUniqueException(slug=data.slug)
+            except CategorySlugAlreadyExistsException as e:
+                failed_slug = data.slug or getattr(
+                    e, "slug", "Указанный slug"
+                )
+                error = CategorySlugIsNotUniqueException(
+                    slug=failed_slug
+                )
                 logger.error(error.get_detail())
                 raise error
-            
+
             return CategoryResponse.model_validate(obj=category)
