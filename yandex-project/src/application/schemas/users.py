@@ -1,25 +1,57 @@
-from pydantic import BaseModel, Field, EmailStr, SecretStr, ConfigDict, field_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    SecretStr,
+    field_validator,
+)
 
-class User(BaseModel):
+
+class UserBase(BaseModel):
     login: str = Field(..., max_length=50)
     email: EmailStr
-    first_name: str | None = Field(None, max_length=50)
-    second_name: str | None = Field(None, max_length=50)
-    model_config = ConfigDict(from_attributes=True)
-
-class UserCreate(User):
-    password: SecretStr = Field(..., min_length=8, max_length=128)
-    
-    @field_validator("password", mode="after")
-    @staticmethod
-    def check_password(password: SecretStr) -> SecretStr:
-        if len(password) < 8:
-            raise ValueError("Пароль должен быть не менее 8 символов")
-
-        return password
+    first_name: str | None = Field(
+        None, max_length=50, description="Имя"
+    )
+    second_name: str | None = Field(
+        None, max_length=50, description="Фамилия"
+    )
 
 
-class UserResponse(User):
+class UserCreate(UserBase):
+    password: SecretStr = Field(
+        ..., min_length=8, max_length=128
+    )
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_complexity(
+        cls, value: SecretStr
+    ) -> SecretStr:
+        raw_password = value.get_secret_value()
+
+        if not any(
+            char.isdigit()
+            for char in raw_password
+        ):
+            raise ValueError(
+                "Пароль должен содержать хотя бы одну цифру"
+            )
+        if not any(
+            char.isupper()
+            for char in raw_password
+        ):
+            raise ValueError(
+                "Пароль должен содержать хотя бы одну заглавную букву"
+            )
+
+        return value
+
+
+class UserResponse(UserBase):
     id: int
-    model_config = ConfigDict(from_attributes=True)
 
+    model_config = ConfigDict(
+        from_attributes=True
+    )
