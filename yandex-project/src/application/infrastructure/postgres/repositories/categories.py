@@ -83,7 +83,7 @@ class CategoryRepository:
 
         query = (
             insert(self._model)
-            .values(data.model_dump(exclude_none=True))
+            .values(data.model_dump())
             .returning(self._model)
         )
 
