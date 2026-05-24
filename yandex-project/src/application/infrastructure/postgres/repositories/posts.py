@@ -1,22 +1,24 @@
-from datetime import datetime
-from typing import Type, List
+from typing import List, Type
 
-
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from application.infrastructure.postgres.models.comments import Comment
-from application.infrastructure.postgres.models.posts import Post
-from application.infrastructure.postgres.models.categories import Category
-from application.infrastructure.postgres.models.locations import Location
-from application.infrastructure.postgres.models.users import User
-from application.core.exceptions.database_exceptions import(
-    PostNotFoundException,
+from application.core.exceptions.database_exceptions import (
     CategoryNotFoundException,
     LocationNotFoundException,
+    PostNotFoundException,
     UserNotFoundException,
-    CommentNotFoundException
 )
+from application.infrastructure.postgres.models.categories import (
+    Category,
+)
+from application.infrastructure.postgres.models.locations import (
+    Location,
+)
+from application.infrastructure.postgres.models.posts import Post
+from application.infrastructure.postgres.models.users import User
+from application.schemas.posts import PostCreate, PostUpdate
+from sqlalchemy import Select, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
+
 
 class PostRepository:
     def __init__(self):
@@ -25,36 +27,36 @@ class PostRepository:
         self._location_model: Type[Location] = Location
         self._category_model: Type[Category] = Category
 
-    async def get_all(
-            self,
-            session: AsyncSession
-    ) -> List[Post]:
-        query = select(self._model)
+    def _get_base_query(self) -> Select:
+        return select(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.category),
+            joinedload(self._model.location),
+            selectinload(self._model.comments),
+        )
+
+    async def get_all(self, session: AsyncSession) -> List[Post]:
+        query = self._get_base_query()
         result = await session.execute(query)
         return list(result.scalars().all())
-    
+
     async def get_published(
-        self,
-        session:AsyncSession,
-        limit: int = 15
+        self, session: AsyncSession, limit: int = 15
     ) -> List[Post]:
         query = (
-            select(self._model)
+            self._get_base_query()
             .where(self._model.is_published.is_(True))
             .order_by(self._model.pub_date.desc())
-            .limit(limit)   
+            .limit(limit)
         )
         result = await session.execute(query)
         return list(result.scalars().all())
 
     async def get_by_id(
-        self,
-        session: AsyncSession,
-        post_id: int
+        self, session: AsyncSession, post_id: int
     ) -> Post:
-        query = (
-            select(self._model)
-            .where(self._model.id == post_id)
+        query = self._get_base_query().where(
+            self._model.id == post_id
         )
         post = await session.execute(query)
         result = post.scalar()
@@ -63,83 +65,64 @@ class PostRepository:
         return result
 
     async def create(
-        self,
-        session: AsyncSession,
-        title: str,
-        text: str,
-        pub_date: datetime,
-        author_id: int,
-        location_id: int |None = None,
-        category_id: int |None = None,
-        image: str |None = None,
-        is_published: bool = True
+        self, session: AsyncSession, author_id: int, data: PostCreate
     ) -> Post:
-        author = session.get(self._author_model, author_id)
+        author = await session.get(self._author_model, author_id)
         if not author:
             raise UserNotFoundException()
 
-        category = session.get(self._category_model, category_id)
-        if not category:
-            raise CategoryNotFoundException()
+        if data.category_id is not None:
+            category = await session.get(
+                self._category_model, data.category_id
+            )
+            if not category:
+                raise CategoryNotFoundException()
 
-        location = session.get(self._location_model,location_id)
-        if not location:
-            raise LocationNotFoundException()
-            
-        post = self._model(
-            title=title,
-            text=text,
-            pub_date=pub_date,
-            author_id=author_id,
-            location_id=location_id,
-            category_id=category_id,
-            image=image,
-            is_published=is_published,
-            created_at=datetime.now()
-        )
-        await session.add(post)
+        if data.location_id is not None:
+            location = await session.get(
+                self._location_model, data.location_id
+            )
+            if not location:
+                raise LocationNotFoundException()
+
+        post = self._model(author_id=author_id, **data.model_dump())
+        session.add(post)
         await session.flush()
-        return post
+        return await self.get_by_id(session, post.id)
 
     async def update(
-        self,
-        session: AsyncSession,
-        post_id: int,
-        title: str,
-        text: str,
-        author_id: int,
-        location_id: int,
-        category_id: int,
-        image: str,
-        is_published: bool
+        self, session: AsyncSession, post_id: int, data: PostUpdate
     ) -> Post:
         post = await self.get_by_id(session, post_id)
-        author = session.get(self._author_model, author_id)
-        if not author:
-            raise UserNotFoundException()
 
-        category = session.get(self._category_model, category_id)
-        if not category:
-            raise CategoryNotFoundException()
+        if (
+            data.category_id is not None
+            and data.category_id != post.category_id
+        ):
+            category = await session.get(
+                self._category_model, data.category_id
+            )
+            if not category:
+                raise CategoryNotFoundException()
 
-        location = session.get(self._location_model,location_id)
-        if not location:
-            raise LocationNotFoundException()
+        if (
+            data.location_id is not None
+            and data.location_id != post.location_id
+        ):
+            location = await session.get(
+                self._location_model, data.location_id
+            )
+            if not location:
+                raise LocationNotFoundException()
 
-        if post:
-            post.title=title
-            post.text = text
-            post.location_id = location_id
-            post.category_id = category_id
-            post.image = image
-            post.is_published = is_published
-            await session.flush()
-        return post
+        update_data = data.model_dump(exclude_none=True)
+        for key, value in update_data.items():
+            setattr(post, key, value)
+        await session.flush()
+        return await self.get_by_id(session, post.id)
 
     async def delete(
-        self,
-        session: AsyncSession,
-        post_id: int
+        self, session: AsyncSession, post_id: int
     ) -> None:
         post = await self.get_by_id(session, post_id)
         await session.delete(post)
