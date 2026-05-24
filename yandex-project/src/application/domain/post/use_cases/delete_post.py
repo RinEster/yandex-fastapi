@@ -25,7 +25,6 @@ class DeletePostUseCase:
                 await self._repo.delete(
                     session=session, post_id=post_id
                 )
-                await session.commit()
             except PostNotFoundException:
                 error = PostNotFoundByIdException(id=post_id)
                 logger.error(error.get_detail())

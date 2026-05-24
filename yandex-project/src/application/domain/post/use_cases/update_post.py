@@ -32,7 +32,6 @@ class UpdatePostUseCase:
                 post = await self._repo.update(
                     session=session, post_id=post_id, data=data
                 )
-                await session.commit()
             except PostNotFoundException:
                 error = PostNotFoundByIdException(id=post_id)
                 logger.error(error.get_detail())

@@ -32,7 +32,6 @@ class CreatePostUseCase:
                 post = await self._repo.create(
                     session=session, author_id=author_id, data=data
                 )
-                await session.commit()
             except UserNotFoundException:
                 error = UserNotFoundByIdException(id=author_id)
                 logger.error(error.get_detail())
