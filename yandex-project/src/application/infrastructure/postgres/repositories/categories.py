@@ -6,7 +6,7 @@ from application.core.exceptions.database_exceptions import (
     CategorySlugAlreadyExistsException,
     CategoryTitleAlreadyExistsException,
 )
-from application.infrastructure.sqlite.models.categories import Category
+from application.infrastructure.postgres.models.categories import Category
 from application.schemas.categories import CategoryCreate, CategoryUpdate
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
