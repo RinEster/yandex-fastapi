@@ -20,6 +20,8 @@ from application.api.depends import (
     update_location_use_case,
 )
 
+from application.services.auth import AuthService
+from application.schemas.users import UserResponse
 locations_router = APIRouter()
 
 
@@ -70,7 +72,8 @@ async def get_location_by_id(
     response_model=LocationResponse,
 )
 async def create_location(
-    data: LocationCreate, use_case=Depends(create_location_use_case)
+    data: LocationCreate, use_case=Depends(create_location_use_case),
+    user: UserResponse = Depends(AuthService.get_current_user),
 ) -> LocationResponse:
     try:
         location = await use_case.execute(data=data)
@@ -91,6 +94,9 @@ async def update_location(
     location_id: int,
     data: LocationUpdate,
     use_case=Depends(update_location_use_case),
+
+    user: UserResponse = Depends(AuthService.get_current_user),
+
 ) -> LocationResponse:
     try:
         location = await use_case.execute(
@@ -111,7 +117,9 @@ async def update_location(
     "/id/{location_id}", status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_location(
-    location_id: int, use_case=Depends(delete_location_use_case)
+    location_id: int, use_case=Depends(delete_location_use_case),
+
+    user: UserResponse = Depends(AuthService.get_current_user),
 ):
     try:
         await use_case.execute(location_id=location_id)

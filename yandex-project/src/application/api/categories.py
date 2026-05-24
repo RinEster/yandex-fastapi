@@ -13,6 +13,8 @@ from application.schemas.categories import (
     CategoryUpdate,
 )
 
+from application.services.auth import AuthService
+from application.schemas.users import UserResponse
 from application.api.depends import (
     create_category_use_case,
     delete_category_use_case,
@@ -90,7 +92,8 @@ async def get_category_by_slug(
     response_model=CategoryResponse,
 )
 async def create_category(
-    data: CategoryCreate, use_case=Depends(create_category_use_case)
+    data: CategoryCreate, use_case=Depends(create_category_use_case),
+    user: UserResponse = Depends(AuthService.get_current_user),
 ) -> CategoryResponse:
     try:
         category = await use_case.execute(data=data)
@@ -113,7 +116,8 @@ async def create_category(
     "/id/{category_id}", status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_category(
-    category_id: int, use_case=Depends(delete_category_use_case)
+    category_id: int, use_case=Depends(delete_category_use_case),
+    user: UserResponse = Depends(AuthService.get_current_user)
 ):
     try:
         await use_case.execute(category_id=category_id)
@@ -133,6 +137,7 @@ async def update_category(
     category_id: int,
     data: CategoryUpdate,
     use_case=Depends(update_category_use_case),
+    current_user: UserResponse = Depends(AuthService.get_current_user)
 ) -> CategoryResponse:
     try:
         category = await use_case.execute(

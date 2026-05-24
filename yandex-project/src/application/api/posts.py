@@ -98,6 +98,8 @@ async def update_post(
     post_id: int,
     data: PostUpdate,
     use_case=Depends(update_post_use_case),
+    current_user: UserResponse = Depends(AuthService.get_current_user)
+
 ) -> PostResponse:
     try:
         return await use_case.execute(post_id=post_id, data=data)
@@ -115,7 +117,8 @@ async def update_post(
     "/id/{post_id}", status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_post(
-    post_id: int, use_case=Depends(delete_post_use_case)
+    post_id: int, use_case=Depends(delete_post_use_case),
+    current_user: UserResponse = Depends(AuthService.get_current_user)
 ):
     try:
         await use_case.execute(post_id=post_id)
