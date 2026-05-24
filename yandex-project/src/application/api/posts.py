@@ -1,114 +1,123 @@
-from fastapi import APIRouter, status, HTTPException, Depends
 from typing import List
-from datetime import datetime
 
-from schemas.posts import Post as PostSchema
-
-from api.depends import (
-    get_get_all_posts_use_case,
-    get_get_post_by_id_use_case,
-    get_create_post_use_case,
-    get_update_post_use_case,
-    get_delete_post_use_case
+from application.api.depends import (
+    create_post_use_case,
+    delete_post_use_case,
+    get_all_posts_use_case,
+    get_post_by_id_use_case,
+    get_published_post_use_case,
+    update_post_use_case,
 )
+from application.schemas.posts import (
+    PostCreate,
+    PostResponse,
+    PostUpdate,
+)
+from core.exceptions.domain_exception import (
+    CategoryNotFoundByIdException,
+    LocationNotFoundByIdException,
+    PostNotFoundByIdException,
+    UserNotFoundByIdException,
+)
+from fastapi import APIRouter, Depends, HTTPException, status
 
-router=APIRouter()
+posts_router = APIRouter()
 
-@router.get("/", status_code=status.HTTP_200_OK, response_model=List[PostSchema])
+
+@posts_router.get(
+    "/",
+    status_code=status.HTTP_200_OK,
+    response_model=List[PostResponse],
+)
 async def get_all_posts(
-    use_case = Depends(get_get_all_posts_use_case)
-) -> List[PostSchema]:
-    posts = await use_case.execute()
-    return posts
+    use_case=Depends(get_all_posts_use_case),
+) -> List[PostResponse]:
+    return await use_case.execute()
 
 
-@router.get("/{post_id}", status_code=status.HTTP_200_OK, response_model=PostSchema)
+@posts_router.get(
+    "/id/{post_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=PostResponse,
+)
 async def get_post_by_id(
-    post_id: int,
-    use_case = Depends(get_get_post_by_id_use_case)
-) -> PostSchema:
+    post_id: int, use_case=Depends(get_post_by_id_use_case)
+) -> PostResponse:
     try:
-        post = await use_case.execute(post_id=post_id)
-        return post
-    except ValueError as e:
+        return await use_case.execute(post_id=post_id)
+    except PostNotFoundByIdException as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
 
 
-@router.post("/add", status_code=status.HTTP_201_CREATED, response_model=PostSchema)
+@posts_router.get(
+    "/published",
+    status_code=status.HTTP_200_OK,
+    response_model=List[PostResponse],
+)
+async def get_published_posts(
+    use_case=Depends(get_published_post_use_case),
+) -> List[PostResponse]:
+    return await use_case.execute()
+
+
+@posts_router.post(
+    "/add",
+    status_code=status.HTTP_201_CREATED,
+    response_model=PostResponse,
+)
 async def create_post(
-    title: str,
-    text: str,
-    pub_date: datetime,
-    author_id: int,
-    location_id: int | None = None,
-    category_id: int | None = None,
-    image: str | None = None,
-    is_published: bool = True,
-    use_case = Depends(get_create_post_use_case)
-) -> PostSchema:
+    data: PostCreate, use_case=Depends(create_post_use_case)
+) -> PostResponse:
     try:
-        post = await use_case.execute(
-            title=title,
-            text=text,
-            pub_date=pub_date,
-            author_id=author_id,
-            location_id=location_id,
-            category_id=category_id,
-            image=image,
-            is_published=is_published
+        return await use_case.execute(data=data)
+    except (
+        CategoryNotFoundByIdException,
+        LocationNotFoundByIdException,
+        UserNotFoundByIdException,
+    ) as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
-        return post
-    except ValueError as e:
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            detail=f"Ошибка при создании поста: {str(e)}",
         )
 
 
-@router.put("/update/{post_id}", status_code=status.HTTP_200_OK, response_model=PostSchema)
+@posts_router.put(
+    "/id/{post_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=PostResponse,
+)
 async def update_post(
     post_id: int,
-    title: str,
-    text: str,
-    location_id: int,
-    category_id: int,
-    image: str,
-    is_published: bool,
-    use_case = Depends(get_update_post_use_case)
-) -> PostSchema:
+    data: PostUpdate,
+    use_case=Depends(update_post_use_case),
+) -> PostResponse:
     try:
-        post = await use_case.execute(
-            post_id=post_id,
-            title=title,
-            text=text,
-            location_id=location_id,
-            category_id=category_id,
-            image=image,
-            is_published=is_published
-        )
-        return post
-    except ValueError as e:
+        return await use_case.execute(post_id=post_id, data=data)
+    except (
+        PostNotFoundByIdException,
+        CategoryNotFoundByIdException,
+        LocationNotFoundByIdException,
+    ) as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
 
 
-@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+@posts_router.delete(
+    "/id/{post_id}", status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_post(
-    post_id: int,
-    use_case = Depends(get_delete_post_use_case)
+    post_id: int, use_case=Depends(delete_post_use_case)
 ):
     try:
         await use_case.execute(post_id=post_id)
-        return
-    except ValueError as e:
+    except PostNotFoundByIdException as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
-
-
