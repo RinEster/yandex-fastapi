@@ -77,9 +77,9 @@ class UserRepository:
 
         if exist_user is not None:
             if exist_user.login == data.login:
-                raise UserLoginAlreadyExistsException()
+                raise UserLoginAlreadyExistsException(login=data.login)
             if exist_user.email == data.email:
-                raise UserEmailAlreadyExistsException()
+                raise UserEmailAlreadyExistsException(email=data.email)
 
         password = data.password.get_secret_value()
         hashed_password = get_password_hash(password)
@@ -100,11 +100,11 @@ class UserRepository:
 
         if data.login is not None and data.login != user.login:
             if await self.chech_login_exists(session, data.login):
-                raise UserLoginAlreadyExistsException()
+                raise UserLoginAlreadyExistsException(login=data.login)
 
         if data.email is not None and data.email != user.email:
             if await self.check_email_exists(session, data.email):
-                raise UserEmailAlreadyExistsException()
+                raise UserEmailAlreadyExistsException(email=data.email)
 
         update_data = data.model_dump(
             exclude_none=True, exclude={"password"}

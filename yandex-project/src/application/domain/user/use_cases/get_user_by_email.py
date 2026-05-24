@@ -1,10 +1,9 @@
 import logging
-
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories.users import UserRepository
-from schemas.users import UserResponse
-from core.exceptions.database_exceptions import UserNotFoundException
-from core.exceptions.domain_exception import UserNotFoundByEmailException
+from application.infrastructure.postgres.database import database
+from application.infrastructure.postgres.repositories.users import UserRepository
+from application.schemas.users import UserResponse
+from application.core.exceptions.database_exceptions import UserNotFoundException
+from application.core.exceptions.domain_exception import UserNotFoundByEmailException
 
 logger = logging.getLogger(__name__)
 
@@ -15,12 +14,11 @@ class GetUserByEmailUseCase:
         self._repo = UserRepository()
 
     async def execute(self, email: str) -> UserResponse:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                user = self._repo.get_user_by_email(session, email)
+                user = await self._repo.get_user_by_email(session=session, email=email)
+                return UserResponse.model_validate(obj=user)
             except UserNotFoundException:
                 error = UserNotFoundByEmailException(email=email)
                 logger.error(error.get_detail())
                 raise error
-
-            return UserResponse.model_validate(obj=user)
