@@ -1,17 +1,17 @@
 from typing import List
 
-from core.exceptions.domain_exception import (
+from application.core.exceptions.domain_exception import (
     LocationNotFoundByIdException,
     LocationTitleIsNotUniqueException,
 )
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas.locations import (
+from application.schemas.locations import (
     LocationCreate,
     LocationResponse,
     LocationUpdate,
 )
 
-from api.depends import (
+from application.api.depends import (
     create_location_use_case,
     delete_location_use_case,
     get_all_locations_use_case,

@@ -1,6 +1,6 @@
 from typing import List
 
-from core.exceptions.domain_exception import (
+from application.core.exceptions.domain_exception import (
     UserEmailIsNotUniqueException,
     UserLoginIsNotUniqueException,
     UserNotFoundByEmailException,
@@ -8,10 +8,10 @@ from core.exceptions.domain_exception import (
     UserNotFoundByLoginException,
 )
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas.users import UserCreate, UserResponse
-from services.auth import AuthService
+from application.schemas.users import UserCreate, UserResponse
+from application.services.auth import AuthService
 
-from api.depends import (
+from application.api.depends import (
     create_user_use_case,
     delete_user_use_case,
     get_all_users_use_case,

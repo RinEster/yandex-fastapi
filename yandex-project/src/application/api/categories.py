@@ -1,19 +1,19 @@
 from typing import List
 
-from core.exceptions.domain_exception import (
+from application.core.exceptions.domain_exception import (
     CategoryNotFoundByIdException,
     CategoryNotFoundBySlugException,
     CategorySlugIsNotUniqueException,
     CategoryTitleIsNotUniqueException,
 )
 from fastapi import APIRouter, Depends, HTTPException, status
-from schemas.categories import (
+from application.schemas.categories import (
     CategoryCreate,
     CategoryResponse,
     CategoryUpdate,
 )
 
-from api.depends import (
+from application.api.depends import (
     create_category_use_case,
     delete_category_use_case,
     get_all_categories_use_case,

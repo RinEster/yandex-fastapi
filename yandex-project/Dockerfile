@@ -1,14 +1,18 @@
 FROM python:3.12.3
 
-ENV PATH="${PATH}:/root/.local/bin"
-COPY src /app/src
-COPY alembic /app/alembic
-COPY alembic.ini /app/
-COPY requirements.txt /app/
-COPY ./images /images
+WORKDIR /yandex-project
 
-ENV PYTHONPATH /app/src
-WORKDIR /app
-RUN pip install -r ./requiriments.txt
+ENV PATH="${PATH}:/root/.local/bin"
+ENV PYTHONPATH /yandex-project/src
+
+COPY src ./src
+COPY alembic ./alembic
+COPY alembic.ini ./
+COPY requirements.txt ./
+COPY ./images ./images
+RUN pip install -r ./requirements.txt
 RUN chmod +x ./src/start.sh
+
 EXPOSE 8000
+
+CMD ["./src/start.sh"]

@@ -1,5 +1,5 @@
 from typing import List
-
+from application.services.auth import AuthService
 from application.api.depends import (
     create_post_use_case,
     delete_post_use_case,
@@ -13,7 +13,8 @@ from application.schemas.posts import (
     PostResponse,
     PostUpdate,
 )
-from core.exceptions.domain_exception import (
+from application.schemas.users import UserResponse
+from application.core.exceptions.domain_exception import (
     CategoryNotFoundByIdException,
     LocationNotFoundByIdException,
     PostNotFoundByIdException,
@@ -68,10 +69,11 @@ async def get_published_posts(
     response_model=PostResponse,
 )
 async def create_post(
-    data: PostCreate, use_case=Depends(create_post_use_case)
+    data: PostCreate, use_case=Depends(create_post_use_case),
+    current_user: UserResponse = Depends(AuthService.get_current_user)
 ) -> PostResponse:
     try:
-        return await use_case.execute(data=data)
+        return await use_case.execute(data=data, author_id=current_user.id)
     except (
         CategoryNotFoundByIdException,
         LocationNotFoundByIdException,

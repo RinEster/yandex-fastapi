@@ -1,11 +1,11 @@
 import logging
 
-from infrastructure.sqlite.database import database
-from infrastructure.sqlite.repositories.users import UserRepository
-from schemas.users import UserResponse
-from resources.auth import verify_password
-from core.exceptions.database_exceptions import UserNotFoundException
-from core.exceptions.domain_exception import UserNotFoundByLoginException, WrongPasswordException
+from application.infrastructure.postgres.database import database
+from application.infrastructure.postgres.repositories.users import UserRepository
+from application.schemas.users import UserResponse
+from application.resources.auth import verify_password
+from application.core.exceptions.database_exceptions import UserNotFoundException
+from application.core.exceptions.domain_exception import UserNotFoundByLoginException, WrongPasswordException
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +21,8 @@ class AuthenticateUserUseCase:
         password: str,
     ) -> UserResponse:
         try:
-            with self._database.session() as session:
-                user = self._repo.get_user_by_login(
+            async with self._database.session() as session:
+                user = await self._repo.get_user_by_login(
                     session=session,
                     login=login
                 )

@@ -2,27 +2,26 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import EmailStr, SecretStr
-from schemas.users import User
 
 users_router = APIRouter()
 
 from typing import Annotated
 
-from core.exceptions.domain_exception import (
+from application.core.exceptions.domain_exception import (
     UserNotFoundByLoginException,
     WrongPasswordException,
 )
-from domain.auth.use_cases.authenticate_user import (
+from application.domain.auth.use_cases.authenticate_user import (
     AuthenticateUserUseCase,
 )
-from domain.auth.use_cases.create_access_token import (
+from application.domain.auth.use_cases.create_access_token import (
     CreateAccessTokenUseCase,
 )
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from schemas.auth import Token
+from application.schemas.auth import Token
 
-from api.depends import (
+from application.api.depends import (
     authenticate_user_use_case,
     create_access_token_use_case,
 )

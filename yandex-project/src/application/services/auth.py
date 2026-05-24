@@ -4,25 +4,19 @@ from pydantic import SecretStr
 from jose import JWTError, jwt
 
 from application.core.exceptions.auth_exceptions import CredentialsException
-from application.core.exceptions.database_exceptions import UserNotFoundException
-from application.schemas.users import UserResponse
+from application.schemas.users import UserResponse as UserSchema 
 from application.resources.auth import oauth2_scheme
-from application.infrastructure.sqlite.database import (
-    database as postgres_database,
-    Database,
-)
-from application.infrastructure.sqlite.repositories.users import UserRepository
-from application.core.config import setting
+from application.infrastructure.postgres.database import database as postgres_database
+from application.infrastructure.postgres.repositories.users import UserRepository
+from application.core.config import settings
 
 AUTH_EXCEPTION_MESSAGE = "Невозможно проверить данные авторизации"
-SECRET_AUTH_KEY = SecretStr("DCTswSgPQuM3zSRM4g9FUFM5EAOr8ypfFwg7pK2eVV8")
+SECRET_AUTH_KEY = SecretStr("0c540f6dd70f6a4582b87147c88ec7f71040e4656aec4aef591f69cc874c122f") 
 AUTH_ALGORITHM = "HS256"
-
 
 class AuthService:
     @staticmethod
     async def _resolve_user_from_token(token: str) -> UserSchema:
-        _database: Database = sqlite_database
         _repo: UserRepository = UserRepository()
 
         try:
@@ -37,8 +31,8 @@ class AuthService:
         except JWTError:
             raise CredentialsException(detail=AUTH_EXCEPTION_MESSAGE)
 
-        with _database.session() as session:
-            user = _repo.get_user_by_login(session=session, login=login)
+        async with postgres_database.session() as session:
+            user = await _repo.get_user_by_login(session=session, login=login)
 
             if not user:
                 raise CredentialsException(detail="Пользователь не найден")

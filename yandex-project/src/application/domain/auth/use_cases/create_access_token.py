@@ -1,14 +1,11 @@
 from datetime import datetime, timedelta, timezone
-
+from typing import Any
 from jose import jwt
 
-from services.auth import SECRET_AUTH_KEY, AUTH_ALGORITHM
+from application.core.config import settings
 
 
 class CreateAccessTokenUseCase:
-    def __init__(self, token_expire_minutes: int = 5) -> None:
-        self._ACCESS_TOKEN_EXPIRE_MINUTES = token_expire_minutes
-
     async def execute(
         self,
         login: str,
@@ -18,13 +15,14 @@ class CreateAccessTokenUseCase:
         if expires_delta:
             expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=self._ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-        to_encode.update({"exp": expire})
+        to_encode: dict[str, Any] = {"sub": login}
+        to_encode["exp"] = int(expire.timestamp())
         encoded_jwt = jwt.encode(
             claims=to_encode,
-            key=SECRET_AUTH_KEY.get_secret_value(),
-            algorithm=AUTH_ALGORITHM,
+            key=settings.SECRET_AUTH_KEY.get_secret_value(),
+            algorithm=settings.AUTH_ALGORITHM,
         )
 
         return encoded_jwt

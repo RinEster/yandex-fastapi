@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:17-alpine3.21
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    env_file:
+      - .env
+    user: ${POSTGRES_USER}
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - app_network
+    ports:
+      - '127.0.0.1:5434:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: application
+    build:
+      context: .
+    pull_policy: build
+    volumes:
+      - .:/yandex-project
+      - ./alembic:/yandex-project/alembic
+      - ./images:/images
+    env_file:
+      - .env
+    ports:
+      - '127.0.0.1:8020:8000'
+    entrypoint: ["/bin/sh", "/yandex-project/src/start.sh"]
+    environment:
+      - PYTHONPATH=/yandex-project/src
+    networks:
+      - app_network
+    depends_on:
+      - postgres
+
+networks:
+  app_network:
+    name: app_network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+
+volumes:
+  db_data:
