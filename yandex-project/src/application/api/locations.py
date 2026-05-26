@@ -2,7 +2,7 @@ from typing import List
 
 from application.core.exceptions.domain_exception import (
     LocationNotFoundByIdException,
-    LocationTitleIsNotUniqueException,
+    LocationNameIsNotUniqueException,
 )
 from fastapi import APIRouter, Depends, HTTPException, status
 from application.schemas.locations import (
@@ -78,10 +78,10 @@ async def create_location(
     try:
         location = await use_case.execute(data=data)
         return location
-    except LocationTitleIsNotUniqueException as e:
+    except LocationNameIsNotUniqueException as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Ошибка при создании локации: {str(e)}",
+            detail=str(e)
         )
 
 
@@ -107,7 +107,7 @@ async def update_location(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
-    except LocationTitleIsNotUniqueException as e:
+    except LocationNameIsNotUniqueException as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
         )

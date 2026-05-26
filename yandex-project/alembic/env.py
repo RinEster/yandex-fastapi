@@ -43,7 +43,7 @@ target_metadata = Base.metadata
 
 
 postgres_url = settings.postgres_url 
-
+print(settings.postgres_url)
 config.set_main_option("sqlalchemy.url", postgres_url)
 def filter_foreign_schemas(name, type_, parent_names):
     return type_ != "schema" or name == settings.POSTGRES_SCHEMA

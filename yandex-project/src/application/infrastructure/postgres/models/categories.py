@@ -17,7 +17,7 @@ class Category(Base):
         primary_key=True, nullable=False, unique=True
     )
     title: Mapped[str] = mapped_column(
-        String(256), nullable=False
+        String(256), unique=True, nullable=False
     )
     description: Mapped[str] = mapped_column(
         Text, nullable=False

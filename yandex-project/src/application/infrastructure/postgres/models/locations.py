@@ -17,7 +17,7 @@ class Location(Base):
         primary_key=True, nullable=False, unique=True
     )
     name: Mapped[str] = mapped_column(
-        String(100), nullable=False
+        String(100),unique=True, nullable=False
     )
     is_published: Mapped[bool] = mapped_column(
         Boolean, default=True

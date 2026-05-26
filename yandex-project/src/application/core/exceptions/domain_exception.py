@@ -42,13 +42,6 @@ class CategoryTitleIsNotUniqueException(BaseDomainException):
 
         super().__init__(detail=self._exception_text_template)
 
-class LocationTitleIsNotUniqueException(BaseDomainException):
-    _exception_text_template = "Локация с названием = '{name}' уже существует"
-
-    def __init__(self, name: str) -> None:
-        self._exception_text_template = self._exception_text_template.format(name=name)
-
-        super().__init__(detail=self._exception_text_template)
 
 class LocationNotFoundByIdException(BaseDomainException):
     _exception_text_template = "Локация с id = '{id}' не найдена"

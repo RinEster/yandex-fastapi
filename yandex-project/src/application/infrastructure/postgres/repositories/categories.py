@@ -15,6 +15,7 @@ from application.schemas.categories import (
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.exc import IntegrityError
 
 class CategoryRepository:
     def __init__(self):
@@ -75,12 +76,6 @@ class CategoryRepository:
     async def create(
         self, session: AsyncSession, data: CategoryCreate
     ) -> Category:
-        if await self.check_title_exists(session, data.title):
-            raise CategoryTitleAlreadyExistsException()
-
-        if await self.check_slug_exists(session, data.slug):
-            raise CategorySlugAlreadyExistsException()
-
         query = (
             insert(self._model)
             .values(data.model_dump())
@@ -89,8 +84,18 @@ class CategoryRepository:
 
         result = await session.execute(query)
         category = result.scalar_one()
+        try:
+            await session.flush()
+        except IntegrityError as e:
+            error_message = str(e.orig)
 
-        await session.flush()
+            if "categories_title_key" in error_message:
+                raise CategoryTitleAlreadyExistsException()
+
+            if "categories_slug_key" in error_message:
+                raise CategorySlugAlreadyExistsException()
+
+            raise
 
         return category
 
@@ -100,21 +105,30 @@ class CategoryRepository:
         category_id: int,
         data: CategoryUpdate,
     ) -> Category:
+
         category = await self.get_by_id(session, category_id)
 
-        if data.title is not None and data.title != category.title:
-            if await self.check_title_exists(session, data.title):
-                raise CategoryTitleAlreadyExistsException()
-
-        if data.slug is not None and data.slug != category.slug:
-            if await self.check_slug_exists(session, data.slug):
-                raise CategorySlugAlreadyExistsException()
-
         update_data = data.model_dump(exclude_none=True)
+
         for key, value in update_data.items():
             setattr(category, key, value)
 
-        await session.flush()
+        try:
+            await session.flush()
+
+        except IntegrityError as e:
+            await session.rollback()
+
+            error_message = str(e.orig)
+
+            if "categories_title_key" in error_message:
+                raise CategoryTitleAlreadyExistsException()
+
+            if "categories_slug_key" in error_message:
+                raise CategorySlugAlreadyExistsException()
+
+            raise
+
         return category
 
     async def delete(
