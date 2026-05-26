@@ -14,6 +14,7 @@ from application.schemas.locations import (
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.exc import IntegrityError
 
 class LocationRepository:
     def __init__(self):
@@ -56,13 +57,14 @@ class LocationRepository:
     async def create(
         self, session: AsyncSession, data: LocationCreate
     ) -> Location:
-        if await self.check_name_exists(session, data.name):
-            raise LocationNameAlreadyExistsException()
 
         location = self._model(**data.model_dump())
         session.add(location)
-        await session.flush()
-
+        try:
+            await session.flush()
+        except IntegrityError:
+            await session.rollback()
+            raise LocationNameAlreadyExistsException()
         return location
 
     async def update(
@@ -73,15 +75,14 @@ class LocationRepository:
     ) -> Location:
         location = await self.get_by_id(session, location_id)
 
-        if data.name is not None and location.name != data.name:
-            if await self.check_name_exists(session, data.name):
-                raise LocationNameAlreadyExistsException()
-
         update_data = data.model_dump(exclude_none=True)
         for key, value in update_data.items():
             setattr(location, key, value)
-
-        await session.flush()
+        try:
+            await session.flush()
+        except IntegrityError:
+            await session.rollback()
+            raise LocationNameAlreadyExistsException()
         return location
 
     async def delete(
