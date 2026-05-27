@@ -126,3 +126,17 @@ class LocationNameIsNotUniqueException(BaseDomainException):
         self._exception_text_template = self._exception_text_template.format(name=name)
 
         super().__init__(detail=self._exception_text_template)
+
+
+class UploadFileIsNotImageException(BaseDomainException):
+    _exception_text = "Загруженный файл не является изображением"
+
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text)
+
+     
+class PostHasNoImageException(BaseDomainException):
+    _exception_text = "Данный пост не содержит изображения"
+
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text)

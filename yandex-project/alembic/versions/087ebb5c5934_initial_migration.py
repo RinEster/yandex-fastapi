@@ -29,6 +29,7 @@ def upgrade() -> None:
     sa.Column('is_published', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('title'),
     sa.UniqueConstraint('id'),
     sa.UniqueConstraint('slug'),
     schema='public'
@@ -39,6 +40,7 @@ def upgrade() -> None:
     sa.Column('is_published', sa.Boolean(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name'),
     sa.UniqueConstraint('id'),
     schema='public'
     )

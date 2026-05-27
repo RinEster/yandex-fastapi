@@ -1,12 +1,14 @@
 from typing import List
 from application.services.auth import AuthService
 from application.api.depends import (
-    create_post_use_case,
+    create_post_use_case, 
     delete_post_use_case,
     get_all_posts_use_case,
     get_post_by_id_use_case,
     get_published_post_use_case,
     update_post_use_case,
+    get_post_image_use_case,
+    add_post_image_use_case
 )
 from application.schemas.posts import (
     PostCreate,
@@ -19,9 +21,15 @@ from application.core.exceptions.domain_exception import (
     LocationNotFoundByIdException,
     PostNotFoundByIdException,
     UserNotFoundByIdException,
+    PostHasNoImageException,
+    UploadFileIsNotImageException
 )
-from fastapi import APIRouter, Depends, HTTPException, status
-
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from pathlib import Path
+import uuid
+from pathlib import Path
+UPLOAD_DIR = Path("images")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 posts_router = APIRouter()
 
 
@@ -126,3 +134,64 @@ async def delete_post(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
+
+
+@posts_router.post(
+    "/id/{post_id}/image",
+    status_code=status.HTTP_200_OK,
+    response_model=PostResponse,
+)
+async def add_post_image(
+    post_id: int,
+    file: UploadFile = File(...),
+    use_case=Depends(add_post_image_use_case),
+    current_user: UserResponse = Depends(
+        AuthService.get_current_user
+    ),
+) -> PostResponse:
+
+    try:
+        filename = f"{uuid.uuid4()}_{file.filename}"
+        file_path = UPLOAD_DIR / filename
+
+        content = await file.read()
+
+        with open(file_path, "wb") as f:
+            f.write(content)
+
+        return await use_case.execute(
+            post_id=post_id,
+            image_path=str(file_path),
+        )
+    except (
+        PostNotFoundByIdException,
+        UploadFileIsNotImageException,
+    ) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+
+@posts_router.get(
+    "/id/{post_id}/image",
+    status_code=status.HTTP_200_OK,
+    response_model=str,
+)
+async def get_post_image(
+    post_id: int,
+    use_case=Depends(get_post_image_use_case),
+) -> str:
+
+    try:
+        return await use_case.execute(post_id=post_id)
+
+    except (
+        PostNotFoundByIdException,
+        PostHasNoImageException,
+    ) as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+

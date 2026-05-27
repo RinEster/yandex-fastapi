@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 
 from application.api.categories import categories_router
@@ -16,7 +17,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
+    app.mount("/images", StaticFiles(directory="/yandex-project/images"),name="images")
     app.include_router(categories_router, prefix="/categories", tags=["Categories"])
     app.include_router(users_router, prefix="/users", tags=["Users"])
     app.include_router(locations_router, prefix="/locations", tags=["Locations"])

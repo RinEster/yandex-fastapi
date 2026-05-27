@@ -42,3 +42,7 @@ class LocationNameAlreadyExistsException(BaseDatabaseException):
 
 class CommentNotFoundException(BaseDatabaseException):
     pass
+
+
+class PostImageNotFound(BaseDatabaseException):
+    pass

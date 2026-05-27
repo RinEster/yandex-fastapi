@@ -28,7 +28,7 @@ class Post(Base):
     )
     text: Mapped[str] = mapped_column(Text, nullable=False)
     pub_date: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False
+        DateTime(timezone=True), nullable=False
     )
     author_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"), nullable=False
@@ -46,7 +46,7 @@ class Post(Base):
         Boolean, default=True
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now()
+        DateTime(timezone=True), server_default=func.now()
     )
 
     author = relationship("User", back_populates="posts")

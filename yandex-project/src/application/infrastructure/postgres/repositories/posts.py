@@ -15,7 +15,7 @@ from application.infrastructure.postgres.models.locations import (
 from application.infrastructure.postgres.models.posts import Post
 from application.infrastructure.postgres.models.users import User
 from application.schemas.posts import PostCreate, PostUpdate
-from sqlalchemy import Select, select
+from sqlalchemy import Select, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -127,3 +127,25 @@ class PostRepository:
         post = await self.get_by_id(session, post_id)
         await session.delete(post)
         await session.flush()
+
+
+    async def add_post_image(
+        self,
+        session: AsyncSession,
+        post_id: int,
+        image_path: str,
+    ) -> Post:
+
+        post = await self.get_by_id(session, post_id)
+
+
+        post.image = image_path
+
+        await session.flush()
+        return post
+
+    async def get_post_image(
+        self, session: AsyncSession, post_id: int
+    ) -> str | None:
+        post = await self.get_by_id(session, post_id)
+        return post.image

@@ -97,8 +97,18 @@ from application.domain.user.use_cases.get_user_by_login import (
 from application.domain.user.use_cases.update_user import (
     UpdateUserUseCase,
 )
+from application.domain.post.use_cases.add_post_image import (
+    AddPostImageUseCase,
+)
+from application.domain.post.use_cases.get_post_image import (
+    GetPostImageUseCase,
+)
+def add_post_image_use_case() -> AddPostImageUseCase:
+    return AddPostImageUseCase()
 
 
+def get_post_image_use_case() -> GetPostImageUseCase:
+    return GetPostImageUseCase()
 def authenticate_user_use_case() -> AuthenticateUserUseCase:
     return AuthenticateUserUseCase()
 
