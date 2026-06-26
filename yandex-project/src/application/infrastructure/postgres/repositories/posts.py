@@ -17,7 +17,7 @@ from application.infrastructure.postgres.models.locations import (
 from application.infrastructure.postgres.models.posts import Post, PostImage
 from application.infrastructure.postgres.models.users import User
 from application.schemas.posts import PostCreate, PostUpdate
-from sqlalchemy import Select, select, update, func
+from sqlalchemy import Select, select, update, func, exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -89,6 +89,40 @@ class PostRepository:
         query = (
             self._get_base_query()
             .where(self._model.is_published.is_(True))
+            .order_by(self._model.pub_date.desc())
+            .limit(size)
+            .offset(offset_value)
+        )
+        result = await session.execute(query)
+        items = list(result.scalars().all())
+        return self._build_pagination_response(items, total, page, size)
+        
+    async def get_all_by_category(
+        self,
+        session: AsyncSession,
+        category_id: int,
+        page: int = 1,
+        size: int = 15
+    ) -> dict:
+       
+        category_exists = await session.scalar(
+            select(exists().where(self._category_model.id == category_id))
+        )
+        if not category_exists:
+            raise CategoryNotFoundException()
+
+        if  self._category_model.id:
+            raise CategoryNotFoundException
+        count_ch = select(func.count(self._model.id)).where(
+            self._category_model.id.is_(category_id)
+        )
+        count_res = await session.execute(count_ch)
+        total = count_res.scalar() or 0
+
+        offset_value = (page - 1) * size
+        query = (
+            self._get_base_query()
+            .where(self._category_model.id.is_(category_id))
             .order_by(self._model.pub_date.desc())
             .limit(size)
             .offset(offset_value)

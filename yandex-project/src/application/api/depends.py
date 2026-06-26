@@ -112,6 +112,11 @@ from application.domain.post.use_cases.delete_all_images import (
     DeleteAllImagesUseCase,
 )
 
+from application.domain.post.use_cases.get_by_category import   GetPostsByCategoryUseCase
+
+def get_post_by_category_use_case() -> GetPostsByCategoryUseCase:
+    return GetPostsByCategoryUseCase()
+
 def add_post_images_use_case() -> AddPostImagesUseCase:
     return AddPostImagesUseCase()
 

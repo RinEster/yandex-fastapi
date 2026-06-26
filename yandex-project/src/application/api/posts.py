@@ -11,6 +11,7 @@ from application.api.depends import (
     add_post_images_use_case,
     delete_all_images_use_case,
     delete_single_image_use_case,
+    get_post_by_category_use_case,
 )
 from application.schemas.posts import (
     PostCreate,
@@ -80,6 +81,23 @@ async def get_published_posts(
 ) -> Page[PostResponse]:
     return await use_case.execute(page=page, size=size)
 
+@posts_router.get(
+    "/category/{category_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=Page[PostResponse],
+)
+async def get_posts_by_category(
+    category_id: int,
+    page: int = 1,
+    size: int = 15,
+    use_case=Depends(get_post_by_category_use_case)
+) -> Page[PostResponse]:
+    try:
+        return await use_case.execute(category_id=category_id,page=page,size=size)
+    except  CategoryNotFoundByIdException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
+        )
 
 @posts_router.post(
     "/add",
