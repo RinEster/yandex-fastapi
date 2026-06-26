@@ -14,6 +14,8 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from typing import List
+
 from ..database import Base
 
 
@@ -39,9 +41,6 @@ class Post(Base):
     category_id: Mapped[int | None] = mapped_column(
         ForeignKey("categories.id"), nullable=True
     )
-    image: Mapped[str | None] = mapped_column(
-        String(500), nullable=True
-    )
     is_published: Mapped[bool] = mapped_column(
         Boolean, default=True
     )
@@ -59,3 +58,13 @@ class Post(Base):
     comments = relationship(
         "Comment", back_populates="post"
     )
+    images: Mapped[List["PostImage"]] = relationship(back_populates="post", cascade="all, delete-orphan")
+
+
+class PostImage(Base):
+    __tablename__ = "post_images"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    image_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), nullable=False)
+    post = relationship("Post",back_populates="images")
