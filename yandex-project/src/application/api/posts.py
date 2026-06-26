@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Annotated
 from application.services.auth import AuthService
 from application.api.depends import (
     create_post_use_case, 
@@ -31,10 +31,10 @@ from application.core.exceptions.domain_exception import (
 )
 
 from application.schemas.page import Page
-from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
 from pathlib import Path
 import uuid
-from pathlib import Path
+
 UPLOAD_DIR = Path("images")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 posts_router = APIRouter()
@@ -64,7 +64,7 @@ async def get_post_by_id(
         return await use_case.execute(post_id=post_id)
     except PostNotFoundByIdException as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
         )
 
 
@@ -74,11 +74,11 @@ async def get_post_by_id(
     response_model=Page[PostResponse],
 )
 async def get_published_posts(
-    page: int =1,
+    page: int = 1,
     size: int = 15,
     use_case=Depends(get_published_post_use_case),
 ) -> Page[PostResponse]:
-    return await use_case.execute(page=page,size=size)
+    return await use_case.execute(page=page, size=size)
 
 
 @posts_router.post(
@@ -98,7 +98,7 @@ async def create_post(
         UserNotFoundByIdException,
     ) as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
         )
     except Exception as e:
         raise HTTPException(
@@ -117,7 +117,6 @@ async def update_post(
     data: PostUpdate,
     use_case=Depends(update_post_use_case),
     current_user: UserResponse = Depends(AuthService.get_current_user)
-
 ) -> PostResponse:
     try:
         return await use_case.execute(post_id=post_id, data=data, user_id=current_user.id)
@@ -127,11 +126,11 @@ async def update_post(
         LocationNotFoundByIdException,
     ) as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
         )
     except NotPostAuthorDomainException as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(e)
+            status_code=status.HTTP_403_FORBIDDEN, detail=e.get_detail()
         )
 
 
@@ -146,13 +145,12 @@ async def delete_post(
         await use_case.execute(post_id=post_id, user_id=current_user.id)
     except PostNotFoundByIdException as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
         )
     except NotPostAuthorDomainException as e:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=str(e)
+            status_code=status.HTTP_403_FORBIDDEN, detail=e.get_detail()
         )
-
 
 
 @posts_router.post(
@@ -162,32 +160,36 @@ async def delete_post(
 )
 async def add_post_images(
     post_id: int,
-    files: List[UploadFile] = File(...),
+    file: UploadFile = File(...),
     use_case=Depends(add_post_images_use_case),
     current_user: UserResponse = Depends(AuthService.get_current_user),
 ) -> PostResponse:
     try:
-        saved_paths = []
-        for file in files:
-            filename = f"{uuid.uuid4()}_{file.filename}"
-            file_path = UPLOAD_DIR / filename
+        filename = f"{uuid.uuid4()}_{file.filename}"
+        file_path = UPLOAD_DIR / filename
 
-            content = await file.read()
-            with open(file_path, "wb") as f:
-                f.write(content)
-            
-            saved_paths.append(str(file_path))
+        content = await file.read()
+
+        with open(file_path, "wb") as f:
+            f.write(content)
 
         return await use_case.execute(
             post_id=post_id,
-            image_paths=saved_paths,
+            image_path=str(file_path),
             user_id=current_user.id
         )
-    except (PostNotFoundByIdException, UploadFileIsNotImageException) as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except PostNotFoundByIdException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
+        )
+    except UploadFileIsNotImageException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=e.get_detail()
+        )
     except NotPostAuthorDomainException as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=e.get_detail()
+        )
 
 
 @posts_router.get(
@@ -202,7 +204,9 @@ async def get_post_images(
     try:
         return await use_case.execute(post_id=post_id)
     except (PostNotFoundByIdException, PostHasNoImageException) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
+        )
 
 
 @posts_router.delete(
@@ -217,9 +221,13 @@ async def delete_all_post_images(
     try:
         await use_case.execute(post_id=post_id, user_id=current_user.id)
     except PostNotFoundByIdException as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
+        )
     except NotPostAuthorDomainException as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=e.get_detail()
+        )
 
 
 @posts_router.delete(
@@ -235,7 +243,10 @@ async def delete_single_post_image(
     try:
         await use_case.execute(post_id=post_id, image_id=image_id, user_id=current_user.id)
     except (PostNotFoundByIdException, PostHasNoImageIdException) as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
+        )
     except NotPostAuthorDomainException as e:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=e.get_detail()
+        )

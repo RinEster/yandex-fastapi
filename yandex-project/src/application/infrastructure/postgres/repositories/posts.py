@@ -105,7 +105,7 @@ class PostRepository:
             self._model.id == post_id
         )
         post = await session.execute(query)
-        result = post.scalar()
+        result = post.unique().scalar_one_or_none()
         if not result:
             raise PostNotFoundException()
         return result
@@ -203,7 +203,7 @@ class PostRepository:
         self,
         session: AsyncSession,
         post_id: int,
-        image_urls: List[str],
+        image_url: str,
         user_id: int
     ) -> Post:
 
@@ -212,8 +212,7 @@ class PostRepository:
         if post.author_id != user_id:
             raise NotPostAuthorException()
 
-        for url in image_urls:
-            post.images.append(self._image_model(image_url=url))
+        post.images.append(self._image_model(image_url=image_url))
 
 
         await session.flush()

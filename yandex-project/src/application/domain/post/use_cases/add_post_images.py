@@ -35,21 +35,20 @@ class AddPostImagesUseCase:
     async def execute(
         self,
         post_id: int,
-        image_paths: List[str],
+        image_path: str,
         user_id: int
     ) -> PostResponse:
 
-        for path_str in image_paths:
-            extension = Path(path_str).suffix.lower()
-            if extension not in self.ALLOWED_EXTENSIONS:
-                raise UploadFileIsNotImageException()
+        extension = Path(image_path).suffix.lower()
+        if extension not in self.ALLOWED_EXTENSIONS:
+            raise UploadFileIsNotImageException()
 
         async with self._database.session() as session:
             try:
                 post = await self._repo.add_post_images(
                     session=session,
                     post_id=post_id,
-                    image_urls=image_paths,
+                    image_url=image_path,
                     user_id=user_id,
                 )
             except PostNotFoundException:
