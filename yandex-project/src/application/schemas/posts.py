@@ -8,6 +8,13 @@ from pydantic import (
 )
 
 
+from typing import List
+
+class PostImageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    image_url: str
+
 class PostBase(BaseModel):
     title: str = Field(
         ...,
@@ -24,9 +31,6 @@ class PostBase(BaseModel):
     category_id: int | None = Field(
         None, description="Категория"
     )
-    image: str | None = Field(
-        None, description="Путь к изображению"
-    )
     is_published: bool = Field(
         True, description="Опубликовано"
     )
@@ -42,7 +46,10 @@ class PostBase(BaseModel):
 
 
 class PostCreate(PostBase):
-    pass
+    images: List[PostImageResponse] = Field(
+        default_factory=list,
+        description="Список объектов изображений с id"
+    )
 
 
 class PostUpdate(BaseModel):
@@ -53,7 +60,10 @@ class PostUpdate(BaseModel):
     pub_date: datetime | None = None
     location_id: int | None = None
     category_id: int | None = None
-    image: str | None = None
+    images: List[str] | None = Field(
+        None,
+        description="Новый список путей к изображениям"
+    )
     is_published: bool | None = None
 
     @field_validator("pub_date")
@@ -77,3 +87,7 @@ class PostResponse(PostBase):
     id: int
     author_id: int
     created_at: datetime
+    images: List[PostImageResponse] = Field(
+        default_factory=list,
+        description="Список объектов изображений с id"
+    )

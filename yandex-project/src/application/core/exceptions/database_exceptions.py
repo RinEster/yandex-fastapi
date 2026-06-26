@@ -44,5 +44,8 @@ class CommentNotFoundException(BaseDatabaseException):
     pass
 
 
-class PostImageNotFound(BaseDatabaseException):
+class PostImageNotFoundException(BaseDatabaseException):
+    pass
+
+class NotPostAuthorException(BaseDatabaseException):
     pass
