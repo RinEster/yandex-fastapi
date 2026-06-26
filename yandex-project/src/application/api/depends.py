@@ -124,6 +124,14 @@ from application.domain.user.use_cases.upload_avatar import UploadAvatarUseCase
 from application.domain.user.use_cases.delete_avatar import DeleteAvatarUseCase
 
 
+from application.domain.post.use_cases.toggle_bookmark import ToggleBookmarkUseCase
+from application.domain.post.use_cases.get_user_bookmark import GetUserBookmarksUseCase
+
+def toggle_bookmark_use_case() -> ToggleBookmarkUseCase:
+    return ToggleBookmarkUseCase()
+
+def get_user_bookmarks_use_case() -> GetUserBookmarksUseCase:
+    return GetUserBookmarksUseCase()
 def upload_avatar_use_case() -> UploadAvatarUseCase:
     return UploadAvatarUseCase()
 

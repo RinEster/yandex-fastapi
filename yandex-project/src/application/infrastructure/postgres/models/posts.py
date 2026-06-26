@@ -5,7 +5,10 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     String,
+    Integer,
     Text,
+    Table,
+    Column,
     func,
 )
 from sqlalchemy.orm import (
@@ -18,7 +21,13 @@ from typing import List
 
 from ..database import Base
 
-
+post_bookmarks = Table(
+    "post_bookmarks",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("post_id", Integer, ForeignKey("posts.id", ondelete="CASCADE"), primary_key=True),
+    schema="public"
+)
 class Post(Base):
     __tablename__ = "posts"
 
@@ -59,7 +68,7 @@ class Post(Base):
         "Comment", back_populates="post"
     )
     images: Mapped[List["PostImage"]] = relationship(back_populates="post", cascade="all, delete-orphan")
-
+    bookmarked_by = relationship("User", secondary=post_bookmarks, backref="bookmarked_posts")
 
 class PostImage(Base):
     __tablename__ = "post_images"

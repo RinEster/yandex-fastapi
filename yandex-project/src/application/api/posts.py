@@ -12,6 +12,8 @@ from application.api.depends import (
     delete_all_images_use_case,
     delete_single_image_use_case,
     get_post_by_category_use_case,
+    toggle_bookmark_use_case,
+    get_user_bookmarks_use_case,
 )
 from application.schemas.posts import (
     PostCreate,
@@ -267,4 +269,40 @@ async def delete_single_post_image(
     except NotPostAuthorDomainException as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail=e.get_detail()
+        )
+
+
+@posts_router.get(
+    "/bookmarks",
+    status_code=status.HTTP_200_OK,
+    response_model=Page[PostResponse],
+)
+async def get_my_bookmarks(
+    page: int = 1,
+    size: int = 15,
+    current_user: UserResponse = Depends(AuthService.get_current_user),
+    use_case=Depends(get_user_bookmarks_use_case),
+) -> Page[PostResponse]:
+    return await use_case.execute(user_id=current_user.id, page=page, size=size)
+
+
+@posts_router.post(
+    "/id/{post_id}/bookmark",
+    status_code=status.HTTP_200_OK,
+)
+async def toggle_post_bookmark(
+    post_id: int,
+    current_user: UserResponse = Depends(AuthService.get_current_user),
+    use_case=Depends(toggle_bookmark_use_case),
+):
+    try:
+        is_bookmarked = await use_case.execute(post_id=post_id, user_id=current_user.id)
+        return {
+            "post_id": post_id,
+            "is_bookmarked": is_bookmarked,
+            "detail": "Пост добавлен в избранное" if is_bookmarked else "Пост удален из избранного"
+        }
+    except PostNotFoundByIdException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=e.get_detail()
         )

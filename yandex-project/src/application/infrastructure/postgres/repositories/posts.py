@@ -314,3 +314,58 @@ class PostRepository:
         await session.flush()
         return post
 
+
+
+    async def toggle_bookmark(
+        self, session: AsyncSession, post_id: int, user_id: int
+    ) -> bool:
+        stmt = (
+            select(self._model)
+            .where(self._model.id == post_id)
+            .options(selectinload(self._model.bookmarked_by))
+        )
+        result = await session.execute(stmt)
+        post = result.unique().scalar_one_or_none()
+
+        if not post:
+            raise PostNotFoundException()
+
+        user = await session.get(self._author_model, user_id)
+
+        if user in post.bookmarked_by:
+            post.bookmarked_by.remove(user)
+            is_bookmarked = False
+        else:
+            post.bookmarked_by.append(user)
+            is_bookmarked = True
+
+        await session.flush()
+        return is_bookmarked
+
+    
+    async def get_user_bookmarks(
+        self, session: AsyncSession, user_id: int, page: int = 1, size: int = 15
+    ) -> dict:
+        count_stmt = (
+            select(func.count(self._model.id))
+            .join(self._model.bookmarked_by)
+            .where(self._author_model.id == user_id)
+        )
+        count_res = await session.execute(count_stmt)
+        total = count_res.scalar() or 0
+
+        offset_value = (page - 1) * size
+        
+        query = (
+            self._get_base_query()
+            .join(self._model.bookmarked_by)
+            .where(self._author_model.id == user_id)
+            .limit(size)
+            .offset(offset_value)
+        )
+        result = await session.execute(query)
+        items = list(result.unique().scalars().all())
+
+        return self._build_pagination_response(items, total, page, size)
+
+
