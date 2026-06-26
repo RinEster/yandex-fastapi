@@ -228,21 +228,25 @@ class PostRepository:
     async def delete_single_image(
         self,
         session: AsyncSession,
+        post_id: int,
         image_id: int,
         user_id: int
     ) -> None:
-        image = await session.get(self._image_model, image_id)
-        if not image:
-            raise PostImageNotFoundException()
-
-        post = await session.get(self._model, image.post_id)
-        if not post:
-            raise PostNotFoundException()
+        post = await self.get_by_id(session, post_id)
 
         if post.author_id != user_id:
             raise NotPostAuthorException()
 
-        await session.delete(image)
+        target_image = None
+        for img in post.images:
+            if img.id == image_id:
+                target_image = img
+                break
+
+        if not target_image:
+            raise PostImageNotFoundException()
+
+        await session.delete(target_image)
         await session.flush()
 
     async def delete_all_images(
