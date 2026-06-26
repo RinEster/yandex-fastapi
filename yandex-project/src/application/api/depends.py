@@ -112,7 +112,28 @@ from application.domain.post.use_cases.delete_all_images import (
     DeleteAllImagesUseCase,
 )
 
+from application.domain.comment.use_cases.add_comment_image import AddCommentImageUseCase
+from application.domain.comment.use_cases.delete_single_image import DeleteSingleCommentImageUseCase
+from application.domain.comment.use_cases.delete_all_image import DeleteAllCommentImagesUseCase
+from application.domain.comment.use_cases.get_comment_image import GetCommentImagesUseCase
+
+
 from application.domain.post.use_cases.get_by_category import   GetPostsByCategoryUseCase
+
+def add_comment_image_use_case() -> AddCommentImageUseCase:
+    return AddCommentImageUseCase()
+
+
+def get_comment_images_use_case() -> GetCommentImagesUseCase:
+    return GetCommentImagesUseCase()
+
+
+def delete_all_comment_images_use_case() -> DeleteAllCommentImagesUseCase:
+    return DeleteAllCommentImagesUseCase()
+
+
+def delete_single_comment_image_use_case() -> DeleteSingleCommentImageUseCase:
+    return DeleteSingleCommentImageUseCase()
 
 def get_post_by_category_use_case() -> GetPostsByCategoryUseCase:
     return GetPostsByCategoryUseCase()

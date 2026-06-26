@@ -16,7 +16,7 @@ from application.infrastructure.postgres.repositories.comments import (
 logger = logging.getLogger(__name__)
 
 
-class DeleteCommentUseCase:
+class DeleteAllCommentImagesUseCase:
     def __init__(self):
         self._database = database
         self._repo = CommentRepository()
@@ -24,7 +24,7 @@ class DeleteCommentUseCase:
     async def execute(self, comment_id: int, user_id: int) -> None:
         async with self._database.session() as session:
             try:
-                await self._repo.delete(
+                await self._repo.delete_all_images(
                     session=session, comment_id=comment_id, user_id=user_id
                 )
             except CommentNotFoundException:

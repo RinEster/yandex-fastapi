@@ -7,6 +7,11 @@ class BaseDomainException(Exception):
     def get_detail(self) -> str:
         return self._detail
 
+class NotCommentAuthorDomainException(BaseDomainException):
+    _exception_text_template = "Пользователь не является автором комментария"
+    
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text_template)
 
 class NotPostAuthorDomainException(BaseDomainException):
     _exception_text_template = "Пользователь не является автором поста"
@@ -147,6 +152,20 @@ class PostHasNoImageException(BaseDomainException):
     def __init__(self) -> None:
         super().__init__(detail=self._exception_text)
 
+
+class CommentHasNoImageException(BaseDomainException):
+    _exception_text = "Данный комментарий не содержит изображения"
+
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text)
+
+
+class CommentHasNoImageIdException(BaseDomainException):
+    _exception_text = "Данный комментарий не содержит изображения с id = 'id' "
+
+    def __init__(self, id: int) -> None:
+        self._exception_text_template = self._exception_text_template.format(id=id)
+        super().__init__(detail=self._exception_text)
 
 class PostHasNoImageIdException(BaseDomainException):
     _exception_text = "Данный пост не содержит изображения с id = 'id' "

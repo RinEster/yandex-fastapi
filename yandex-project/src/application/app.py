@@ -7,7 +7,7 @@ from application.api.users import users_router
 from application.api.locations import locations_router
 from application.api.posts import posts_router
 from application.api.auth import router as auth_router
-
+from application.api.comments import comments_router 
 def create_app() -> FastAPI:
     app = FastAPI(root_path="/api/v1", debug=True)
     app.add_middleware(
@@ -22,5 +22,6 @@ def create_app() -> FastAPI:
     app.include_router(users_router, prefix="/users", tags=["Users"])
     app.include_router(locations_router, prefix="/locations", tags=["Locations"])
     app.include_router(posts_router,prefix="/posts", tags=["Posts"])
+    app.include_router(comments_router,prefix="/comments", tags=["Comments"])
     app.include_router(auth_router, tags=["Auth APIs"])
     return app
