@@ -97,18 +97,33 @@ from application.domain.user.use_cases.get_user_by_login import (
 from application.domain.user.use_cases.update_user import (
     UpdateUserUseCase,
 )
-from application.domain.post.use_cases.add_post_image import (
-    AddPostImageUseCase,
+from application.domain.post.use_cases.add_post_images import (
+    AddPostImagesUseCase,
 )
-from application.domain.post.use_cases.get_post_image import (
-    GetPostImageUseCase,
+from application.domain.post.use_cases.get_post_images import (
+    GetPostImagesUseCase,
 )
-def add_post_image_use_case() -> AddPostImageUseCase:
-    return AddPostImageUseCase()
+
+from application.domain.post.use_cases.delete_single_image import (
+    DeleteSingleImageUseCase,
+)
+
+from application.domain.post.use_cases.delete_all_images import (
+    DeleteAllImagesUseCase,
+)
+
+def add_post_images_use_case() -> AddPostImagesUseCase:
+    return AddPostImagesUseCase()
 
 
-def get_post_image_use_case() -> GetPostImageUseCase:
-    return GetPostImageUseCase()
+def delete_single_image_use_case() -> DeleteSingleImageUseCase:
+    return DeleteSingleImageUseCase()
+
+
+def delete_all_images_use_case() -> DeleteAllImagesUseCase:
+    return DeleteAllImagesUseCase()
+def get_post_images_use_case() -> GetPostImagesUseCase:
+    return GetPostImagesUseCase()
 def authenticate_user_use_case() -> AuthenticateUserUseCase:
     return AuthenticateUserUseCase()
 

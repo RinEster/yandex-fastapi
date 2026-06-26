@@ -29,6 +29,9 @@ class User(Base):
     second_name: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )
+    avatar: Mapped[str|None] = mapped_column(
+        nullable=True, default=None
+    ) 
 
     posts = relationship(
         "Post",
