@@ -126,3 +126,19 @@ class UserRepository:
         user = await self.get_user_by_id(session, user_id)
         await session.delete(user)
         await session.flush()
+
+    async def update_avatar(
+        self, session: AsyncSession, user_id: int, avatar_path: str
+    ) -> User:
+        user = await self.get_user_by_id(session, user_id)
+        user.avatar = avatar_path
+        await session.flush()
+        return user
+
+    async def delete_avatar(
+        self, session: AsyncSession, user_id: int
+    ) -> User:
+        user = await self.get_user_by_id(session, user_id)
+        user.avatar = None
+        await session.flush()
+        return user

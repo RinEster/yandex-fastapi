@@ -120,6 +120,16 @@ from application.domain.comment.use_cases.get_comment_image import GetCommentIma
 
 from application.domain.post.use_cases.get_by_category import   GetPostsByCategoryUseCase
 
+from application.domain.user.use_cases.upload_avatar import UploadAvatarUseCase
+from application.domain.user.use_cases.delete_avatar import DeleteAvatarUseCase
+
+
+def upload_avatar_use_case() -> UploadAvatarUseCase:
+    return UploadAvatarUseCase()
+
+
+def delete_avatar_use_case() -> DeleteAvatarUseCase:
+    return DeleteAvatarUseCase()
 def add_comment_image_use_case() -> AddCommentImageUseCase:
     return AddCommentImageUseCase()
 
@@ -168,6 +178,7 @@ def get_post_by_id_use_case() -> GetPostByIdUseCase:
 
 def create_post_use_case() -> CreatePostUseCase:
     return CreatePostUseCase()
+
 
 
 def update_post_use_case() -> UpdatePostUseCase:

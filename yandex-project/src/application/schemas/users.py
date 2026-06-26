@@ -82,5 +82,8 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: int
+    avatar: str | None = Field(
+        None, description="Путь к файлу аватара пользователя"
+    )
 
     model_config = ConfigDict(from_attributes=True)
