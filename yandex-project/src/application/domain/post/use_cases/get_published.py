@@ -1,9 +1,8 @@
-from typing import List
-
 from application.infrastructure.postgres.database import database
 from application.infrastructure.postgres.repositories.posts import (
     PostRepository,
 )
+from application.schemas.page import Page  
 from application.schemas.posts import PostResponse
 
 
@@ -12,9 +11,12 @@ class GetPublishedPostsUseCase:
         self._database = database
         self._repo = PostRepository()
 
-    async def execute(self, limit: int = 15) -> List[PostResponse]:
+    async def execute(self, page: int = 1, size: int = 15) -> Page[PostResponse]:
         async with self._database.session() as session:
-            posts = await self._repo.get_published(
-                session=session, limit=limit
+            pagination_dict = await self._repo.get_published(
+                session=session, 
+                page=page, 
+                size=size
             )
-            return [PostResponse.model_validate(obj=p) for p in posts]
+            
+            return Page[PostResponse].model_validate(pagination_dict)

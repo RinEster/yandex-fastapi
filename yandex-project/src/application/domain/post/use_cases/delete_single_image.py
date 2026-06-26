@@ -1,47 +1,36 @@
 import logging
 
 from application.core.exceptions.database_exceptions import (
-    CategoryNotFoundException,
-    LocationNotFoundException,
     PostNotFoundException,
     NotPostAuthorException,
+    PostImageNotFoundException
 )
 from application.core.exceptions.domain_exception import (
-    CategoryNotFoundByIdException,
-    LocationNotFoundByIdException,
     PostNotFoundByIdException,
     NotPostAuthorDomainException,
+PostHasNoImageIdException
+
 )
 from application.infrastructure.postgres.database import database
 from application.infrastructure.postgres.repositories.posts import (
     PostRepository,
 )
-from application.schemas.posts import PostResponse, PostUpdate
 
 logger = logging.getLogger(__name__)
 
 
-class UpdatePostUseCase:
+class DeleteSingleImageUseCase:
     def __init__(self):
         self._database = database
         self._repo = PostRepository()
 
-    async def execute(
-        self, 
-        post_id: int, 
-        user_id: int,
-        data: PostUpdate
-    ) -> PostResponse:
+    async def execute(self, post_id: int, image_id: int, user_id: int) -> None:
         async with self._database.session() as session:
             try:
-                post = await self._repo.update(
-                    session=session, 
-                    post_id=post_id, 
-                    data=data,
-                    user_id=user_id
+                await self._repo.delete_single_image(
+                    session=session, post_id=post_id, image_id=image_id,user_id=user_id
+
                 )
-                return PostResponse.model_validate(obj=post)
-                
             except PostNotFoundException:
                 error = PostNotFoundByIdException(id=post_id)
                 logger.error(error.get_detail())
@@ -50,13 +39,7 @@ class UpdatePostUseCase:
                 error = NotPostAuthorDomainException()
                 logger.error(error.get_detail())
                 raise error
-            except CategoryNotFoundException:
-                failed_id = data.category_id or 0
-                error = CategoryNotFoundByIdException(id=failed_id)
-                logger.error(error.get_detail())
-                raise error
-            except LocationNotFoundException:
-                failed_id = data.location_id or 0
-                error = LocationNotFoundByIdException(id=failed_id)
+            except PostImageNotFoundException:
+                error = PostHasNoImageIdException(id=post_id)
                 logger.error(error.get_detail())
                 raise error

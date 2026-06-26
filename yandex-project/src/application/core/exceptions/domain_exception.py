@@ -8,6 +8,12 @@ class BaseDomainException(Exception):
         return self._detail
 
 
+class NotPostAuthorDomainException(BaseDomainException):
+    _exception_text_template = "Пользователь не является автором поста"
+    
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text_template)
+
 class CategoryNotFoundByIdException(BaseDomainException):
     _exception_text_template = "Категория с id = {id} не найдена"
 
@@ -139,4 +145,12 @@ class PostHasNoImageException(BaseDomainException):
     _exception_text = "Данный пост не содержит изображения"
 
     def __init__(self) -> None:
+        super().__init__(detail=self._exception_text)
+
+
+class PostHasNoImageIdException(BaseDomainException):
+    _exception_text = "Данный пост не содержит изображения с id = 'id' "
+
+    def __init__(self, id: int) -> None:
+        self._exception_text_template = self._exception_text_template.format(id=id)
         super().__init__(detail=self._exception_text)

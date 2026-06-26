@@ -1,31 +1,56 @@
 import logging
+from pathlib import Path
+from typing import List
 
 from application.core.exceptions.database_exceptions import (
     PostNotFoundException,
-NotPostAuthorException
+    NotPostAuthorException,
 )
 from application.core.exceptions.domain_exception import (
     PostNotFoundByIdException,
-NotPostAuthorDomainException
+    NotPostAuthorDomainException,
+    UploadFileIsNotImageException,
 )
 from application.infrastructure.postgres.database import database
 from application.infrastructure.postgres.repositories.posts import (
     PostRepository,
 )
+from application.schemas.posts import PostResponse
 
 logger = logging.getLogger(__name__)
 
 
-class DeletePostUseCase:
+class AddPostImagesUseCase:
+
+    ALLOWED_EXTENSIONS = {
+        ".jpg",
+        ".jpeg",
+        ".png",
+    }
+
     def __init__(self):
         self._database = database
         self._repo = PostRepository()
 
-    async def execute(self, post_id: int, user_id: int) -> None:
+    async def execute(
+        self,
+        post_id: int,
+        image_paths: List[str],
+        user_id: int
+    ) -> PostResponse:
+
+        for path_str in image_paths:
+            extension = Path(path_str).suffix.lower()
+            if extension not in self.ALLOWED_EXTENSIONS:
+                raise UploadFileIsNotImageException()
+
         async with self._database.session() as session:
             try:
-                await self._repo.delete(
-                    session=session, post_id=post_id, user_id=user_id
+                post = await self._repo.add_post_images(
+                    session=session,
+                    post_id=post_id,
+                    image_urls=image_paths,
+                    user_id=user_id,
                 )
             except PostNotFoundException:
                 error = PostNotFoundByIdException(id=post_id)
@@ -35,3 +60,5 @@ class DeletePostUseCase:
                 error = NotPostAuthorDomainException()
                 logger.error(error.get_detail())
                 raise error
+
+        return PostResponse.model_validate(post)

@@ -1,30 +1,43 @@
+import logging
+from typing import List
 
+from application.core.exceptions.database_exceptions import PostNotFoundException
 from application.core.exceptions.domain_exception import (
+    PostNotFoundByIdException,
     PostHasNoImageException,
 )
+from application.infrastructure.postgres.database import database
 from application.infrastructure.postgres.repositories.posts import (
     PostRepository,
 )
+from application.schemas.posts import PostImageResponse
 
-from application.infrastructure.postgres.database import database
+logger = logging.getLogger(__name__)
 
-class GetPostImageUseCase:
+
+class GetPostImagesUseCase:
 
     def __init__(self):
         self._repo = PostRepository()
         self._database = database
+
     async def execute(
         self,
         post_id: int,
-    ) -> str:
+    ) -> List[PostImageResponse]:
 
         async with self._database.session() as session:
-            image = await self._repo.get_post_image(
-                session=session,
-                post_id=post_id,
-            )
+            try:
+                images = await self._repo.get_post_images(
+                    session=session,
+                    post_id=post_id,
+                )
+            except PostNotFoundException:
+                error = PostNotFoundByIdException(id=post_id)
+                logger.error(error.get_detail())
+                raise error
 
-            if not image:
+            if not images:
                 raise PostHasNoImageException()
 
-        return image
+            return [PostImageResponse.model_validate(img) for img in images]
